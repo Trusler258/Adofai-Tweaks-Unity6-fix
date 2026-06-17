@@ -7,11 +7,11 @@
 <a name="chinese"></a>
 ## 中文
 
-基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的社区维护版，修复了《冰与火之舞》升级到 **Unity 6（r143）** 后的兼容性问题，**保留了原项目的全部功能**。
+基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的项目，修复了《冰与火之舞》升级到 **Unity 6（r143）** 后的兼容性问题，**保留了原项目的全部功能**。
 
 ### 变更说明
 
-游戏从旧版 Unity 升级到 Unity 6 时大幅重构了 C# 代码，导致原版 Harmony 补丁多处失效。本仓库修复了以下 API 变更：
+游戏从旧版 Unity 升级到 Unity 6 时大幅重构了 C# 代码，导致原版 Harmony 补丁多处失效。本仓库修复了以下 API 变更等：
 
 | 旧 API | 新 API |
 |--------|--------|
@@ -26,7 +26,7 @@
 
 ### 安装
 
-1. 安装 [UnityModManager](https://adof.ai/umm)
+1. 安装 [UnityModManager](https://www.nexusmods.com/site/mods/21)
 2. 从 [Releases](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix/releases) 下载 `AdofaiTweaks-v2.9.0.zip`
 3. 打开 UnityModManager，将 zip 拖入窗口
 4. 启动游戏
@@ -45,14 +45,14 @@
 
 ### 许可
 
-[MIT License](LICENSE)，与原始项目一致。
+[MIT License](LICENSE)
 
 ---
 
 <a name="english"></a>
 ## English
 
-Community-maintained fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks), updated for **Unity 6 (r143)** compatibility while preserving all original features.
+Fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks), updated for **Unity 6 (r143)** compatibility while preserving all original features.
 
 ### What changed
 
@@ -60,11 +60,11 @@ The game underwent significant C# code refactoring during the Unity 6 upgrade, b
 
 ### Installation
 
-1. Install [UnityModManager](https://adof.ai/umm)
+1. Install [UnityModManager](https://www.nexusmods.com/site/mods/21)
 2. Download `AdofaiTweaks-v2.9.0.zip` from [Releases](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix/releases)
 3. Drag the zip into UnityModManager
 4. Launch the game
 
 ### License
 
-[MIT License](LICENSE), same as the original project.
+[MIT License](LICENSE)
