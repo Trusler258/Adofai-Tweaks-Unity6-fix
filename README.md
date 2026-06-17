@@ -1,5 +1,13 @@
 # AdofaiTweaks — Unity 6 兼容移植版
 
+[![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Version](https://img.shields.io/badge/version-v2.9.0-ff69b4)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
+[![Stars](https://img.shields.io/github/stars/Trusler258/Adofai-Tweaks-Unity6-fix?style=flat)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
+[![Language](https://img.shields.io/github/languages/top/Trusler258/Adofai-Tweaks-Unity6-fix)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
+[![Downloads](https://img.shields.io/github/downloads/Trusler258/Adofai-Tweaks-Unity6-fix/total)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
+[![Repo Size](https://img.shields.io/github/repo-size/Trusler258/Adofai-Tweaks-Unity6-fix)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
+
 [English](#english) | [中文](#chinese)
 
 ---
