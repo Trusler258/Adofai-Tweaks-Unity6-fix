@@ -43,6 +43,8 @@
 - **星球颜色/透明度** — 自定义星球颜色和透明度
 - **杂项** — 禁用 Glitch 翻转、强制音效音量等
 
+<sub>Code by DeepSeek v4 Pro &amp; Trusler</sub>
+
 ### 许可
 
 [MIT License](LICENSE)
@@ -64,6 +66,8 @@ The game underwent significant C# code refactoring during the Unity 6 upgrade, b
 2. Download `AdofaiTweaks-v2.9.0.zip` from [Releases](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix/releases)
 3. Drag the zip into UnityModManager
 4. Launch the game
+
+<sub>Code by DeepSeek v4 Pro &amp; Trusler</sub>
 
 ### License
 
