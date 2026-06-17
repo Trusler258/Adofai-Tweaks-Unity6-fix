@@ -1,0 +1,7 @@
+bin/
+obj/
+*.zip
+zipmod/
+*.user
+*.suo
+.vs/

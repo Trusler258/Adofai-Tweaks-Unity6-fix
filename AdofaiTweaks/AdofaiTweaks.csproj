@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{285D8437-6A8E-4ABE-AB99-9936852430F7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AdofaiTweaks</RootNamespace>
+    <AssemblyName>AdofaiTweaks</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <LangVersion>12</LangVersion>
+    <GamePath>E:\SteamLibrary\steamapps\common\A Dance of Fire and Ice</GamePath>
+    <ManagedPath>$(GamePath)\A Dance of Fire and Ice_Data\Managed</ManagedPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- NuGet Packages -->
+    <PackageReference Include="IndexRange" Version="1.0.3" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" PrivateAssets="all" />
+    
+    <!-- External DLLs from installed mod -->
+    <Reference Include="AdofaiTweaks.Compat.Async">
+      <HintPath>$(GamePath)\Mods\AdofaiTweaks\AdofaiTweaks.Compat.AsyncSkyHook.dll</HintPath>
+    </Reference>
+    <Reference Include="AdofaiTweaks.Strings">
+      <HintPath>$(GamePath)\Mods\AdofaiTweaks\AdofaiTweaks.Strings.dll</HintPath>
+    </Reference>
+    <Reference Include="AdofaiTweaks.Translation">
+      <HintPath>$(GamePath)\Mods\AdofaiTweaks\AdofaiTweaks.Translation.dll</HintPath>
+    </Reference>
+    <Reference Include="IndexRange">
+      <HintPath>$(GamePath)\Mods\AdofaiTweaks\IndexRange.dll</HintPath>
+    </Reference>
+    <Reference Include="LiteDB">
+      <HintPath>$(GamePath)\Mods\AdofaiTweaks\LiteDB.dll</HintPath>
+    </Reference>
+    
+    <!-- Game DLLs -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(ManagedPath)\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween">
+      <HintPath>$(ManagedPath)\DOTween.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTweenPro">
+      <HintPath>$(ManagedPath)\DOTweenPro.dll</HintPath>
+    </Reference>
+    <Reference Include="RDTools">
+      <HintPath>$(ManagedPath)\RDTools.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>$(ManagedPath)\Rewired_Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SkyHook.Unity">
+      <HintPath>$(ManagedPath)\SkyHook.Unity.dll</HintPath>
+    </Reference>
+    
+    <!-- Unity DLLs -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedPath)\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>$(ManagedPath)\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ManagedPath)\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedPath)\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedPath)\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(ManagedPath)\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>$(ManagedPath)\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>$(ManagedPath)\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ManagedPath)\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    
+    <!-- UMM -->
+    <Reference Include="0Harmony">
+      <HintPath>$(ManagedPath)\UnityModManager\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityModManager">
+      <HintPath>$(ManagedPath)\UnityModManager\UnityModManager.dll</HintPath>
+    </Reference>
+    
+    <!-- System -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="netstandard">
+      <HintPath>$(ManagedPath)\netstandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdofaiTweaks.cs" />
+    <Compile Include="Startup.cs" />
+    <Compile Include="GlobalSettings.cs" />
+    <Compile Include="GameVersionState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- Core -->
+    <Compile Include="Core\Attributes\RegisterTweakAttribute.cs" />
+    <Compile Include="Core\Attributes\SyncTweakSettingsAttribute.cs" />
+    <Compile Include="Core\Attributes\TweakPatchAttribute.cs" />
+    <Compile Include="Core\MoreGUILayout.cs" />
+    <Compile Include="Core\TweakKeyShortcut.cs" />
+    <Compile Include="Core\ShadowedText.cs" />
+    <Compile Include="Core\TweakAssets.cs" />
+    <Compile Include="Core\TweakPatch.cs" />
+    <Compile Include="Core\TweakRunner.cs" />
+    <Compile Include="Core\TweakSettings.cs" />
+    <Compile Include="Core\SettingsSynchronizer.cs" />
+    <Compile Include="Core\TweakSettingsProfile.cs" />
+    <Compile Include="Core\TweakStringsDb.cs" />
+    <Compile Include="Core\TweakStrings.cs" />
+    <Compile Include="Core\Tweak.cs" />
+    <!-- Utils -->
+    <Compile Include="Utils\PathDataUtils.cs" />
+    <Compile Include="Utils\PlanetComparison.cs" />
+    <Compile Include="Utils\PlanetGetter.cs" />
+    <Compile Include="Utils\SteamIntegrationChecker.cs" />
+    <!-- Tweaks -->
+    <Compile Include="Tweaks\DisableEffects\DisableEffectsPatches.cs" />
+    <Compile Include="Tweaks\DisableEffects\DisableEffectsSettings.cs" />
+    <Compile Include="Tweaks\DisableEffects\DisableEffectsTweak.cs" />
+    <Compile Include="Tweaks\EditorTweaks\EditorTweaksPatches.cs" />
+    <Compile Include="Tweaks\EditorTweaks\EditorTweaksSettings.cs" />
+    <Compile Include="Tweaks\EditorTweaks\EditorTweaksTweak.cs" />
+    <Compile Include="Tweaks\HideUiElements\HideUiElementsPatches.cs" />
+    <Compile Include="Tweaks\HideUiElements\HideUiElementsSettings.cs" />
+    <Compile Include="Tweaks\HideUiElements\HideUiElementsTweak.cs" />
+    <Compile Include="Tweaks\HideUiElements\HideUiElementsProfile.cs" />
+    <Compile Include="Tweaks\JudgmentVisuals\HitErrorMeter.cs" />
+    <Compile Include="Tweaks\JudgmentVisuals\JudgmentVisualsPatches.cs" />
+    <Compile Include="Tweaks\JudgmentVisuals\JudgmentVisualsSettings.cs" />
+    <Compile Include="Tweaks\JudgmentVisuals\JudgmentVisualsTweak.cs" />
+    <Compile Include="Tweaks\KeyLimiter\KeyLimiterPatches.cs" />
+    <Compile Include="Tweaks\KeyLimiter\KeyLimiterSettings.cs" />
+    <Compile Include="Tweaks\KeyLimiter\KeyLimiterTweak.cs" />
+    <Compile Include="Tweaks\KeyViewer\KeyViewer.cs" />
+    <Compile Include="Tweaks\KeyViewer\KeyViewerPatches.cs" />
+    <Compile Include="Tweaks\KeyViewer\KeyViewerProfile.cs" />
+    <Compile Include="Tweaks\KeyViewer\KeyViewerSettings.cs" />
+    <Compile Include="Tweaks\KeyViewer\KeyViewerTweak.cs" />
+    <Compile Include="Tweaks\KeyViewer\ReplayInput.cs" />
+    <Compile Include="Tweaks\Miscellaneous\MiscellaneousPatches.cs" />
+    <Compile Include="Tweaks\Miscellaneous\MiscellaneousSettings.cs" />
+    <Compile Include="Tweaks\Miscellaneous\MiscellaneousTweak.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetColor.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetColorType.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetComponentColor.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetColorPatches.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetColorSettings.cs" />
+    <Compile Include="Tweaks\PlanetColor\PlanetColorTweak.cs" />
+    <Compile Include="Tweaks\PlanetOpacity\PlanetOpacityPatches.cs" />
+    <Compile Include="Tweaks\PlanetOpacity\PlanetOpacityProfile.cs" />
+    <Compile Include="Tweaks\PlanetOpacity\PlanetOpacitySettings.cs" />
+    <Compile Include="Tweaks\PlanetOpacity\PlanetOpacityTweak.cs" />
+    <Compile Include="Tweaks\RestrictGameplay\RestrictGameplayAction.cs" />
+    <Compile Include="Tweaks\RestrictGameplay\RestrictGameplayPatches.cs" />
+    <Compile Include="Tweaks\RestrictGameplay\RestrictGameplaySettings.cs" />
+    <Compile Include="Tweaks\RestrictGameplay\RestrictGameplayTweak.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

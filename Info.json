@@ -1,0 +1,12 @@
+{
+  "Id": "AdofaiTweaks",
+  "DisplayName": "ADOFAI Tweaks",
+  "Author": "PizzaLovers007, @Trusler",
+  "Version": "2.9.0",
+  "ManagerVersion": "0.32.5",
+  "AssemblyName": "AdofaiTweaks.dll",
+  "EntryMethod": "AdofaiTweaks.Startup.Load",
+  "HomePage": "https://github.com/PizzaLovers007/AdofaiTweaks",
+  "Repository": "https://raw.githubusercontent.com/PizzaLovers007/AdofaiTweaks/master/Repository.json",
+  "Description": "Unity 6 / r143 compatibility fix by @Trusler"
+}
