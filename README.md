@@ -7,7 +7,7 @@
 <a name="chinese"></a>
 ## 中文
 
-基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的项目，修复了《冰与火之舞》升级到 **Unity 6（r143）** 后的兼容性问题，**保留了原项目的全部功能**。
+基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的项目，修复了《冰与火之舞》升级到 **Unity 6（r143）** 后的兼容性问题，大部分功能可用，但可能存在未知 Bug。
 
 ### 变更说明
 
@@ -52,7 +52,7 @@
 <a name="english"></a>
 ## English
 
-Fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks), updated for **Unity 6 (r143)** compatibility while preserving all original features.
+Fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks), updated for **Unity 6 (r143)** compatibility; most features work, unknown bugs may exist.
 
 ### What changed
 
