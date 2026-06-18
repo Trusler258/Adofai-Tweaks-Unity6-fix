@@ -16,25 +16,32 @@ internal static class PlanetOpacityPatches
 
     public static bool CanLoadPlanetRenderer { get; }
 
-    private static float GetBodyOpacity(scrPlanet planet) {
-        if (PlanetComparison.IsRedPlanetLegacy(planet))         return Settings.PlanetOpacity1.Body;
-        if (PlanetComparison.IsBluePlanetLegacy(planet)) return Settings.PlanetOpacity2.Body;
-        return Settings.PlanetOpacity3.Body;
-    }
-
     private static float GetBodyOpacityNew(PlanetRenderer planet) {
         if (PlanetComparison.IsRedPlanet(planet)) return Settings.PlanetOpacity1.Body;
         if (PlanetComparison.IsBluePlanet(planet)) return Settings.PlanetOpacity2.Body;
         return Settings.PlanetOpacity3.Body;
     }
 
+    private static float GetTailOpacityNew(PlanetRenderer planet) {
+        if (PlanetComparison.IsRedPlanet(planet)) return Settings.PlanetOpacity1.Tail;
+        if (PlanetComparison.IsBluePlanet(planet)) return Settings.PlanetOpacity2.Tail;
+        return Settings.PlanetOpacity3.Tail;
+    }
+
+    private static float GetRingOpacityNew(PlanetRenderer planet) {
+        if (PlanetComparison.IsRedPlanet(planet)) return Settings.PlanetOpacity1.Ring;
+        if (PlanetComparison.IsBluePlanet(planet)) return Settings.PlanetOpacity2.Ring;
+        return Settings.PlanetOpacity3.Ring;
+    }
+
     private static Color ApplyOpacity(Color color, float opacity) {
         return new Color(color.r, color.g, color.b, color.a * opacity / 100f);
     }
 
+    // Prefix modifies color BEFORE the original method runs
     [TweakPatch("PlanetOpacity.SetPlanetColorPost128", "PlanetRenderer", "SetPlanetColor", minVersion: 128)]
     private static class PlanetRendererSetPlanetColorPatch {
-        public static void Postfix(PlanetRenderer __instance, ref Color color) {
+        public static void Prefix(PlanetRenderer __instance, ref Color color) {
             if (PlanetComparison.IsFake(__instance)) return;
             color = ApplyOpacity(color, GetBodyOpacityNew(__instance));
         }
@@ -42,23 +49,23 @@ internal static class PlanetOpacityPatches
 
     [TweakPatch("PlanetOpacity.SetTailColorPost128", "PlanetRenderer", "SetTailColor", minVersion: 128)]
     private static class PlanetRendererSetTailColorPatch {
-        public static void Postfix(PlanetRenderer __instance, ref Color color) {
+        public static void Prefix(PlanetRenderer __instance, ref Color color) {
             if (PlanetComparison.IsFake(__instance)) return;
-            color = ApplyOpacity(color, GetBodyOpacityNew(__instance));
+            color = ApplyOpacity(color, GetTailOpacityNew(__instance));
         }
     }
 
     [TweakPatch("PlanetOpacity.SetRingColorPost128", "PlanetRenderer", "SetRingColor", minVersion: 128)]
     private static class PlanetRendererSetRingColorPatch {
-        public static void Postfix(PlanetRenderer __instance, ref Color color) {
+        public static void Prefix(PlanetRenderer __instance, ref Color color) {
             if (PlanetComparison.IsFake(__instance)) return;
-            color = ApplyOpacity(color, GetBodyOpacityNew(__instance));
+            color = ApplyOpacity(color, GetRingOpacityNew(__instance));
         }
     }
 
     [TweakPatch("PlanetOpacity.SetFaceColorPost128", "PlanetRenderer", "SetFaceColor", minVersion: 128)]
     private static class PlanetRendererSetFaceColorPatch {
-        public static void Postfix(PlanetRenderer __instance, ref Color color) {
+        public static void Prefix(PlanetRenderer __instance, ref Color color) {
             if (PlanetComparison.IsFake(__instance)) return;
             color = ApplyOpacity(color, GetBodyOpacityNew(__instance));
         }
