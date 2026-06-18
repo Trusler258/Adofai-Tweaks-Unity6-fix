@@ -38,6 +38,18 @@ internal static class PlanetOpacityPatches
         return new Color(color.r, color.g, color.b, color.a * opacity / 100f);
     }
 
+    // Patch EnableDefaultFireAndIceColor because for default red/blue planets,
+    // SetPlanetColor is never called — the body color is set directly as sprite.color = Color.white
+    [TweakPatch("PlanetOpacity.DefaultFireAndIceColorPost128", "PlanetRenderer", "EnableDefaultFireAndIceColor", minVersion: 128)]
+    private static class PlanetRendererEnableDefaultFireAndIceColorPatch {
+        public static void Postfix(PlanetRenderer __instance) {
+            if (PlanetComparison.IsFake(__instance)) return;
+            float opacity = GetBodyOpacityNew(__instance);
+            if (opacity >= 100f) return;
+            __instance.sprite.color = ApplyOpacity(__instance.sprite.color, opacity);
+        }
+    }
+
     // Prefix modifies color BEFORE the original method runs
     [TweakPatch("PlanetOpacity.SetPlanetColorPost128", "PlanetRenderer", "SetPlanetColor", minVersion: 128)]
     private static class PlanetRendererSetPlanetColorPatch {
