@@ -14,7 +14,8 @@ internal class TweakPatch
         Metadata = metadata;
         Harmony = harmony;
         ClassType = (assembly ?? typeof(ADOBase).Assembly).GetType(Metadata.ClassName);
-        PatchTargetMethods = ClassType?.GetMethods(AccessTools.all).Where(m => m.Name.Equals(Metadata.MethodName));
+        PatchTargetMethods = ClassType?.GetMethods(AccessTools.all)
+            .Where(m => m.Name.Equals(Metadata.MethodName) && !m.IsAbstract);
     }
 
     private Harmony Harmony { get; }
@@ -65,7 +66,6 @@ internal class TweakPatch
             AdofaiTweaks.Logger.Log($"Applying patch {Metadata.PatchId}");
 #endif
             foreach (MethodInfo method in PatchTargetMethods) {
-                if (method.IsAbstract) continue;
                 List<HarmonyMethod> hardcodedMethods = new List<HarmonyMethod>();
                 foreach (string methodName in _hardcodedMethodNames) {
                     MethodInfo patchMethod = AccessTools.Method(PatchType, methodName);
