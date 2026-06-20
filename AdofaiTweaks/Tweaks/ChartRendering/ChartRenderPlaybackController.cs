@@ -50,12 +50,21 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 return;
             }
 
+            // Always restore time/framerate regardless of editor state
+            savedState.Restore();
+
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor != null && (editor.playMode || !editor.inStrictlyEditingMode))
+                if (editor == null) return;
+
+                // Force exit playback mode — call multiple times if needed
+                if (editor.playMode || !editor.inStrictlyEditingMode)
                 {
                     editor.SwitchToEditMode();
+                    // Second attempt after short delay sometimes needed
+                    if (editor.playMode)
+                        editor.SwitchToEditMode();
                 }
             }
             catch (Exception ex)

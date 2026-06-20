@@ -261,6 +261,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
             if (cancelRequested)
             {
+                IsRendering = false;
                 result.Success = false;
                 result.Message = "Canceled.";
                 Cleanup(frameCapture, encoder, restoreEditor: false, deleteTemp: true);
@@ -270,6 +271,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
             if (failure != null)
             {
+                IsRendering = false;
                 result.Success = false;
                 result.Message = failure.Message;
                 Cleanup(frameCapture, encoder, restoreEditor: false, deleteTemp: true);

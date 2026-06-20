@@ -279,6 +279,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             chartRenderSession = new ChartRenderSession(ChartRenderMain.Mod, ChartRenderMain.Settings);
             StartCoroutine(chartRenderSession.Run(result =>
             {
+                chartRenderSession = null;
                 chartRenderMessage = result.Success
                     ? T("完成: ") + result.OutputPath
                     : T("失败: ") + result.Message;
