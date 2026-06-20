@@ -12,6 +12,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const float ExpandedH = 520f;
 
         private static EditorTweaksOverlayWindow instance;
+        private static bool mouseOverOverlay;
         private Rect windowRect;
         private ChartRenderSession chartRenderSession;
         private string chartRenderMessage;
@@ -29,12 +30,13 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (instance == null) return;
             Destroy(instance.gameObject);
             instance = null;
+            mouseOverOverlay = false;
         }
 
-        public static bool ShouldBlockEditorInput() => instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive;
-        public static bool ShouldBlockMouseInput() => false;
+        public static bool ShouldBlockEditorInput() => (instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive) || mouseOverOverlay;
+        public static bool ShouldBlockMouseInput() => mouseOverOverlay;
         public static bool ShouldBlockGameplayInput() => ShouldBlockEditorInput();
-        public static bool ShouldBlockUnityUiInput() => false;
+        public static bool ShouldBlockUnityUiInput() => mouseOverOverlay;
 
         private void Awake()
         {
@@ -47,11 +49,17 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         private void OnGUI()
         {
+            mouseOverOverlay = false;
             if (!ShouldDraw()) return;
             float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : ExpandedH;
             windowRect.height = h;
             windowRect.width = Width;
             windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
+
+            // Capture mouse if pointer is over the full window rect
+            Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            if (windowRect.Contains(mouse))
+                mouseOverOverlay = true;
         }
 
         private static bool ShouldDraw()
