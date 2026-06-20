@@ -33,6 +33,21 @@ public class MiscellaneousTweak : Tweak
 #endif
 
     /// <inheritdoc/>
+    public override void OnEnable() {
+        // Lazy-init ChartRendering on game start if toggle was left enabled
+        if (!chartRenderInitialized && Settings.EnableChartRendering) {
+            chartRenderInitialized = true;
+            ChartRendering.ChartRenderMain.Settings = ChartRendering.ChartRenderingSettings.Load(ChartRendering.ChartRenderMain.Mod);
+            ChartRendering.ChartRenderMain.Settings.EnsureDefaults(ChartRendering.ChartRenderMain.Mod);
+            ChartRendering.ChartRenderMain.Settings.ShowEditorOverlay = true;
+            ChartRendering.ChartRenderMain.IsZh = AdofaiTweaks.GlobalSettings.Language.ToString() == "CHINESE_SIMPLIFIED";
+            ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
+            ChartRendering.ChartRenderPatcher.Enable();
+            ChartRendering.ChartRenderMain.Log("Chart rendering re-initialized on reload");
+        }
+    }
+
+    /// <inheritdoc/>
     public override void OnSettingsGUI() {
         // Glitch flip
         Settings.DisableGlitchFlip =
@@ -92,18 +107,6 @@ public class MiscellaneousTweak : Tweak
             Settings.SyncInputStateToInputOptions = GUILayout.Toggle(
                 Settings.SyncInputStateToInputOptions,
                 TweakStrings.Get(TranslationKeys.Miscellaneous.SYNC_INPUT_STATE));
-        }
-
-        // Chart rendering — lazy-init on reload if already enabled
-        if (!chartRenderInitialized && Settings.EnableChartRendering) {
-            chartRenderInitialized = true;
-            ChartRendering.ChartRenderMain.Settings = ChartRendering.ChartRenderingSettings.Load(ChartRendering.ChartRenderMain.Mod);
-            ChartRendering.ChartRenderMain.Settings.EnsureDefaults(ChartRendering.ChartRenderMain.Mod);
-            ChartRendering.ChartRenderMain.Settings.ShowEditorOverlay = true;
-            ChartRendering.ChartRenderMain.IsZh = AdofaiTweaks.GlobalSettings.Language.ToString() == "CHINESE_SIMPLIFIED";
-            ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
-            ChartRendering.ChartRenderPatcher.Enable();
-            ChartRendering.ChartRenderMain.Log("Chart rendering re-initialized on reload");
         }
 
         // Chart rendering
