@@ -396,7 +396,14 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
         private void DrainReadyFrames(ChartRenderFramePipeline framePipeline, FfmpegEncoder encoder)
         {
-            framePipeline.DrainReadyFrames(encoder, () => cancelRequested);
+            try
+            {
+                framePipeline.DrainReadyFrames(encoder, () => cancelRequested);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on cancel — the encoder is being torn down, ignore
+            }
             progress.UpdateFrames(framePipeline.WrittenFrames, framePipeline.DuplicateFrames);
         }
 
