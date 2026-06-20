@@ -9,7 +9,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 520f;
+        private const float ExpandedH = 550f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseOverOverlay;
@@ -130,6 +130,16 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (showJ != ChartRenderMain.Settings.ChartRenderShowHitJudgments) { ChartRenderMain.Settings.ChartRenderShowHitJudgments = showJ; SaveSettings(); }
 
             y += 30;
+            // Audio Sync Offset
+            GUI.Label(new Rect(14, y, lw, 22), T("音频偏移(ms)"));
+            var os = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs.ToString("0.#"));
+            if (float.TryParse(os, out float ov)) { ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs = Mathf.Clamp(ov, -500, 500); SaveSettings(); }
+            // Show current game calibration as hint
+            int gameCalMs = 0;
+            try { gameCalMs = scrConductor.currentPreset.inputOffset; } catch { }
+            GUI.Label(new Rect(lw + 80, y, vw - 60, 22), T("游戏") + ": " + gameCalMs + "ms");
+
+            y += 30;
             // Encoder
             GUI.Label(new Rect(14, y, lw, 22), T("编码器"));
             string[] modes = { "auto", "fastest", "balanced", "quality", "cpu" };
@@ -185,6 +195,13 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         {
             chartRenderMessage = string.Empty;
             ChartRenderMain.Settings.EnsureDefaults(ChartRenderMain.Mod);
+
+            // Auto-fill audio sync offset from game calibration if not manually set
+            if (ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs == 0f)
+            {
+                try { ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs = scrConductor.currentPreset.inputOffset; } catch { }
+            }
+
             chartRenderSession = new ChartRenderSession(ChartRenderMain.Mod, ChartRenderMain.Settings);
             StartCoroutine(chartRenderSession.Run(result =>
             {
@@ -208,6 +225,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "请设置导出目录" => "Set export directory",
             "工作目录" => "Workspace",
             "导出目录" => "Export Dir",
+            "音频偏移(ms)" => "Audio Offset(ms)",
+            "游戏" => "Game",
             "完成: " => "Done: ", "失败: " => "Failed: ",
             _ => zh
         };
