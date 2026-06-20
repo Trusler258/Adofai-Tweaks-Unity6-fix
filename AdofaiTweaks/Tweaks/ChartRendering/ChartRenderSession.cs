@@ -375,6 +375,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsRendering = false;
             ChartRenderVisualClock.End();
             RestoreState();
+            // Ensure frame timing is released (savedState may not restore cleanly in r143)
+            if (Time.captureFramerate != 0) Time.captureFramerate = 0;
             ChartRenderDiagnostics.End();
             onComplete(result);
         }
