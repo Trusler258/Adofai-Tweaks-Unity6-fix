@@ -257,7 +257,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             }
 
             ChartRenderVisualClock.End();
-            RestoreState();
 
             if (cancelRequested)
             {
