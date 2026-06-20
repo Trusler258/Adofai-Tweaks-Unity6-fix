@@ -9,7 +9,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 550f;
+        private const float ExpandedH = 610f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseOverOverlay;
@@ -134,10 +134,28 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             GUI.Label(new Rect(14, y, lw, 22), T("音频偏移(ms)"));
             var os = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs.ToString("0.#"));
             if (float.TryParse(os, out float ov)) { ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs = Mathf.Clamp(ov, -500, 500); SaveSettings(); }
-            // Show current game calibration as hint
             int gameCalMs = 0;
             try { gameCalMs = scrConductor.currentPreset.inputOffset; } catch { }
             GUI.Label(new Rect(lw + 80, y, vw - 60, 22), T("游戏") + ": " + gameCalMs + "ms");
+
+            y += 30;
+            // Rate control
+            GUI.Label(new Rect(14, y, lw, 22), T("码率模式"));
+            string[] rcModes = { "CQP", "VBR", "CBR" };
+            string[] rcVals = { "crf", "vbr", "cbr" };
+            int rcSel = Array.IndexOf(rcVals, ChartRenderMain.Settings.ChartRenderRateControl);
+            if (rcSel < 0) rcSel = 0;
+            int rcNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), rcSel, rcModes, 3);
+            if (rcNew != rcSel) { ChartRenderMain.Settings.ChartRenderRateControl = rcVals[rcNew]; SaveSettings(); }
+
+            y += 30;
+            // Bitrate (only for VBR/CBR)
+            bool isBitrate = ChartRenderMain.Settings.ChartRenderRateControl != "crf";
+            GUI.enabled = isBitrate;
+            GUI.Label(new Rect(14, y, lw, 22), T("码率(Mbps)"));
+            var brs = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderBitrateMbps.ToString("0.#"));
+            if (float.TryParse(brs, out float brv)) { ChartRenderMain.Settings.ChartRenderBitrateMbps = Mathf.Clamp(brv, 0.5f, 500f); SaveSettings(); }
+            GUI.enabled = true;
 
             y += 30;
             // Encoder
@@ -175,7 +193,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private static string GetProfileText()
         {
             var s = ChartRenderMain.Settings;
-            return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps  CRF:{s.ChartRenderCrf}";
+            string rc = s.ChartRenderRateControl == "crf" ? "CRF:" + s.ChartRenderCrf : s.ChartRenderRateControl.ToUpper() + " " + s.ChartRenderBitrateMbps.ToString("0.#") + "M";
+            return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps  {rc}";
         }
 
         private static string GetDisabledReason()
@@ -195,13 +214,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         {
             chartRenderMessage = string.Empty;
             ChartRenderMain.Settings.EnsureDefaults(ChartRenderMain.Mod);
-
-            // Auto-fill audio sync offset from game calibration if not manually set
-            if (ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs == 0f)
-            {
-                try { ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs = scrConductor.currentPreset.inputOffset; } catch { }
-            }
-
             chartRenderSession = new ChartRenderSession(ChartRenderMain.Mod, ChartRenderMain.Settings);
             StartCoroutine(chartRenderSession.Run(result =>
             {
@@ -227,6 +239,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "导出目录" => "Export Dir",
             "音频偏移(ms)" => "Audio Offset(ms)",
             "游戏" => "Game",
+            "码率模式" => "Rate Control",
+            "码率(Mbps)" => "Bitrate(Mbps)",
             "完成: " => "Done: ", "失败: " => "Failed: ",
             _ => zh
         };

@@ -163,7 +163,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                     settings.ChartRenderPreset,
                     frameCapture.PixelFormatName,
                     budget.MaxEncoderQueueFrames,
-                    settings.ChartRenderAudioSyncOffsetMs);
+                    settings.ChartRenderAudioSyncOffsetMs,
+                    settings.ChartRenderRateControl,
+                    settings.ChartRenderBitrateMbps);
                 encoder.BeginVideo();
                 EncoderName = encoder.EncoderName;
                 BeginForcedVisualClock();

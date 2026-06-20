@@ -25,6 +25,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         private readonly string inputPixelFormat;
         private readonly int queueCapacityFrames;
         private readonly float audioSyncOffsetMs;
+        private readonly string rateControl;
+        private readonly float bitrateMbps;
         private Process? process;
         private BlockingCollection<QueuedFrame>? frameQueue;
         private Thread? writerThread;
@@ -42,7 +44,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             string customPreset,
             string inputPixelFormat,
             int queueCapacityFrames,
-            float audioSyncOffsetMs)
+            float audioSyncOffsetMs,
+            string rateControl = "crf",
+            float bitrateMbps = 50f)
         {
             this.ffmpegPath = ffmpegPath;
             this.tempVideoPath = tempVideoPath;
@@ -56,6 +60,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             this.inputPixelFormat = ChartRenderOptionValues.NormalizeCaptureFormat(inputPixelFormat);
             this.queueCapacityFrames = Math.Max(1, queueCapacityFrames);
             this.audioSyncOffsetMs = audioSyncOffsetMs;
+            this.rateControl = (rateControl ?? "crf").ToLowerInvariant();
+            this.bitrateMbps = Math.Max(0.1f, bitrateMbps);
         }
 
         public string EncoderName { get; private set; } = "unknown";
@@ -268,30 +274,78 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             {
                 string nvencPreset = GetNvencPreset();
                 string tune = encoderMode == ChartRenderOptionValues.EncoderFastest ? "ll" : "hq";
-                EncoderName = "h264_nvenc " + nvencPreset;
-                ChartRenderMain.Log("Chart renderer using h264_nvenc preset " + nvencPreset + ".");
-                return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune + " -rc constqp -qp " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+                EncoderName = "h264_nvenc " + nvencPreset + " " + rateControl;
+                ChartRenderMain.Log("Chart renderer using h264_nvenc preset " + nvencPreset + " rate_control=" + rateControl + ".");
+                return BuildNvencArgs(nvencPreset, tune);
             }
 
             string x264Preset = GetX264Preset();
-            EncoderName = "libx264 " + x264Preset;
-            ChartRenderMain.Log("Chart renderer using libx264 preset " + x264Preset + ".");
-            return "-c:v libx264 -preset " + Quote(x264Preset) + " -crf " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+            EncoderName = "libx264 " + x264Preset + " " + rateControl;
+            ChartRenderMain.Log("Chart renderer using libx264 preset " + x264Preset + " rate_control=" + rateControl + ".");
+            return BuildX264Args(x264Preset);
+        }
+
+        private string BuildNvencArgs(string nvencPreset, string tune)
+        {
+            // Use -cq (spatial AQ) instead of -rc constqp -qp for better perceptual quality
+            if (rateControl == "crf")
+            {
+                return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
+                    + " -cq " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+            }
+            // VBR / CBR
+            string bv = ((int)(bitrateMbps * 1000)) + "k";
+            string maxrate = ((int)(bitrateMbps * 2000)) + "k";
+            string bufsize = ((int)(bitrateMbps * 4000)) + "k";
+            if (rateControl == "cbr")
+            {
+                return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
+                    + " -rc cbr -b:v " + bv + " -maxrate " + bv + " -bufsize " + bufsize
+                    + " -g " + Math.Max(1, fps * 2);
+            }
+            return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
+                + " -rc vbr -b:v " + bv + " -maxrate " + maxrate + " -bufsize " + bufsize
+                + " -g " + Math.Max(1, fps * 2);
+        }
+
+        private string BuildX264Args(string x264Preset)
+        {
+            if (rateControl == "crf")
+            {
+                return "-c:v libx264 -preset " + Quote(x264Preset) + " -crf " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+            }
+            string bv = ((int)(bitrateMbps * 1000)) + "k";
+            string maxrate = ((int)(bitrateMbps * 2000)) + "k";
+            string bufsize = ((int)(bitrateMbps * 4000)) + "k";
+            if (rateControl == "cbr")
+            {
+                return "-c:v libx264 -preset " + Quote(x264Preset)
+                    + " -b:v " + bv + " -maxrate " + bv + " -bufsize " + bufsize
+                    + " -nal-hrd cbr -g " + Math.Max(1, fps * 2);
+            }
+            return "-c:v libx264 -preset " + Quote(x264Preset)
+                + " -b:v " + bv + " -maxrate " + maxrate + " -bufsize " + bufsize
+                + " -g " + Math.Max(1, fps * 2);
         }
 
         private string GetCustomVideoEncoderArguments()
         {
             if (!ForcesCustomCpuEncoder() && IsNvencAvailable())
             {
-                EncoderName = "h264_nvenc p1";
+                EncoderName = "h264_nvenc p1 " + rateControl;
                 ChartRenderMain.Log("Chart renderer using custom compatibility h264_nvenc.");
-                return "-c:v h264_nvenc -preset p1 -tune ll -rc constqp -qp " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+                if (rateControl == "crf")
+                    return "-c:v h264_nvenc -preset p1 -tune ll -cq " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+                string bv = ((int)(bitrateMbps * 1000)) + "k";
+                return "-c:v h264_nvenc -preset p1 -tune ll -rc " + (rateControl == "cbr" ? "cbr" : "vbr")
+                    + " -b:v " + bv + " -maxrate " + bv + " -bufsize " + ((int)(bitrateMbps * 4000)) + "k"
+                    + " -g " + Math.Max(1, fps * 2);
             }
 
             string x264Preset = GetRealtimePreset();
-            EncoderName = "libx264 " + x264Preset;
+            EncoderName = "libx264 " + x264Preset + " " + rateControl;
             ChartRenderMain.Log("Chart renderer using custom libx264 preset " + x264Preset + ".");
-            return "-c:v libx264 -preset " + Quote(x264Preset) + " -crf " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
+            return BuildX264Args(x264Preset);
         }
 
         private bool ForcesCpuEncoder()

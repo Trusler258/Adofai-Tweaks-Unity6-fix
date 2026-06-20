@@ -43,6 +43,11 @@ public class ChartRenderingSettings
     public bool ChartRenderShowHitJudgments = true;
     public bool ChartRenderAdvancedSettingsExpanded = false;
 
+    /// <summary>Rate control mode: "crf" (default), "vbr", "cbr"</summary>
+    public string ChartRenderRateControl = "crf";
+    /// <summary>Video bitrate in Mbps (used when rate control is vbr or cbr)</summary>
+    public float ChartRenderBitrateMbps = 50f;
+
     /// <summary>
     /// Ensure defaults for paths (called before render session).
     /// </summary>
