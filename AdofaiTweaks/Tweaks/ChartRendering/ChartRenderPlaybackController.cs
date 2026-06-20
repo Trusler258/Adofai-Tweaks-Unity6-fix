@@ -67,12 +67,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             {
                 ChartRenderMain.Log("Failed to restore editor state: " + ex.Message);
             }
-                }
-            }
-            catch (Exception ex)
-            {
-                ChartRenderMain.Log("Failed to switch back to edit mode: " + ex.Message);
-            }
         }
 
         public static bool IsPlayableLevelLoaded()
