@@ -55,10 +55,18 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor != null)
+                if (editor != null && editor.floors != null && editor.floors.Count > 0)
                 {
-                    // Force-reload: go to edit mode, then restart play
+                    editor.SelectFloor(editor.floors[0], cameraJump: false);
+                    GCS.checkpointNum = 0;
+                    RDC.auto = false;
                     editor.SwitchToEditMode();
+                }
+            }
+            catch (Exception ex)
+            {
+                ChartRenderMain.Log("Failed to restore editor state: " + ex.Message);
+            }
                 }
             }
             catch (Exception ex)
