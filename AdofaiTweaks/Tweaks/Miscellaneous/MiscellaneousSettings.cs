@@ -55,6 +55,11 @@ public class MiscellaneousSettings : TweakSettings
     public bool SyncInputStateToInputOptions { get; set; } = true;
 
     /// <summary>
+    /// Enables the chart rendering overlay window (video export from editor).
+    /// </summary>
+    public bool EnableChartRendering { get; set; }
+
+    /// <summary>
     /// Updates volume, should be called every map loads.
     /// </summary>
     public void UpdateVolume() {

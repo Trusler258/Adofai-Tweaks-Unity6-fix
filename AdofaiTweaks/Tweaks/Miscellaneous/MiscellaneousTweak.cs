@@ -92,6 +92,17 @@ public class MiscellaneousTweak : Tweak
                 TweakStrings.Get(TranslationKeys.Miscellaneous.SYNC_INPUT_STATE));
         }
 
+        // Chart rendering
+        bool newChartRender = GUILayout.Toggle(
+            Settings.EnableChartRendering,
+            "启用谱面视频渲染 (Chart Rendering)");
+        if (newChartRender != Settings.EnableChartRendering) {
+            Settings.EnableChartRendering = newChartRender;
+            if (newChartRender) {
+                ChartRendering.ChartRenderMain.Settings.EditorOverlayCollapsed = false;
+            }
+        }
+
 #if DEBUG
         // Test feature
         if (Settings.SetBpmOnStart =

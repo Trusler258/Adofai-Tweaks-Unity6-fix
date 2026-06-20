@@ -82,6 +82,9 @@
     </Reference>
     
     <!-- Unity DLLs -->
+    <Reference Include="Unity.Collections">
+      <HintPath>$(ManagedPath)\Unity.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
     </Reference>
@@ -211,6 +214,28 @@
     <Compile Include="Tweaks\RestrictGameplay\RestrictGameplayPatches.cs" />
     <Compile Include="Tweaks\RestrictGameplay\RestrictGameplaySettings.cs" />
     <Compile Include="Tweaks\RestrictGameplay\RestrictGameplayTweak.cs" />
+    <!-- ChartRendering -->
+    <Compile Include="Tweaks\ChartRendering\ChartRenderMain.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderingSettings.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartFrameCapture.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderAudioPatches.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderAutoPlayer.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderDiagnostics.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderFramePipeline.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderJudgmentPatches.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderMemoryBudget.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderOptionValues.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderPaths.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderPlaybackController.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderProgressModel.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderResult.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderSession.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderVisualClock.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartUnityAudioCapture.cs" />
+    <Compile Include="Tweaks\ChartRendering\EditorPreferencesPersistencePatches.cs" />
+    <Compile Include="Tweaks\ChartRendering\FfmpegEncoder.cs" />
+    <Compile Include="Tweaks\ChartRendering\EditorOverlay\EditorOverlayInputBlockPatches.cs" />
+    <Compile Include="Tweaks\ChartRendering\EditorOverlay\EditorTweaksOverlayWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
