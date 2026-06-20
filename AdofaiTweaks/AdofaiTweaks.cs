@@ -36,6 +36,7 @@ public static class AdofaiTweaks
                 .ToList();
 
         Logger = modEntry.Logger;
+        Tweaks.ChartRendering.ChartRenderMain.Mod = modEntry;
         synchronizer = new SettingsSynchronizer();
         synchronizer.Load(modEntry);
 

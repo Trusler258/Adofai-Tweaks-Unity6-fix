@@ -99,7 +99,10 @@ public class MiscellaneousTweak : Tweak
         if (newChartRender != Settings.EnableChartRendering) {
             Settings.EnableChartRendering = newChartRender;
             if (newChartRender) {
-                ChartRendering.ChartRenderMain.Settings.EditorOverlayCollapsed = false;
+                ChartRendering.ChartRenderMain.Settings.ShowEditorOverlay = true;
+                ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
+            } else {
+                ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Destroy();
             }
         }
 
