@@ -206,10 +206,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
                 yield return new WaitForEndOfFrame();
 
-                // Unity 6: flush GPU command buffer to ensure render target
-                // is fully written before AsyncGPUReadback reads it
-                GL.Flush();
-
                 if (!Try(() =>
                 {
                     audioCapture!.CaptureFrame();
