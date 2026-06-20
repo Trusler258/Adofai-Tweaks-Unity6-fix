@@ -69,8 +69,15 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         {
             cancelRequested = true;
             IsRendering = false;
-            // Immediately restore editor mode — don't wait for coroutine to drain frames
+            IsAutoPlaybackReady = false;
+            ChartRenderVisualClock.End();
+
+            // Immediately restore editor mode and reset frame timing
             RestoreState();
+            // Force reset frame control in case saved state restore missed
+            Time.captureFramerate = 0;
+            QualitySettings.vSyncCount = 1;
+            Application.targetFrameRate = -1;
         }
 
         public IEnumerator Run(Action<ChartRenderResult> onComplete)
@@ -380,6 +387,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsRendering = false;
             ChartRenderVisualClock.End();
             RestoreState();
+            // Force reset frame control
+            Time.captureFramerate = 0;
+            Application.targetFrameRate = -1;
             ChartRenderDiagnostics.End();
             onComplete(result);
         }
