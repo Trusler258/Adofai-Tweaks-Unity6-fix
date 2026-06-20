@@ -209,7 +209,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 // Unity 6: flush GPU command buffer to ensure render target
                 // is fully written before AsyncGPUReadback reads it
                 GL.Flush();
-                yield return null;
 
                 if (!Try(() =>
                 {
