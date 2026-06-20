@@ -8,5 +8,5 @@
   "EntryMethod": "AdofaiTweaks.Startup.Load",
   "HomePage": "https://github.com/PizzaLovers007/AdofaiTweaks",
   "Repository": "https://raw.githubusercontent.com/PizzaLovers007/AdofaiTweaks/master/Repository.json",
-  "Description": "Unity 6 / r143 compatibility fix by @Trusler"
+  "Description": "Unity 6 / r143 fix by @Trusler. Chart rendering from ADOFAI.EditorTweaks (memsys-lizi)"
 }

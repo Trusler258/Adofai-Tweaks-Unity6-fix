@@ -50,6 +50,7 @@
 - **隐藏 UI** — 隐藏 Otto、结果文字等元素
 - **星球颜色/透明度** — 自定义星球颜色和透明度
 - **杂项** — 禁用 Glitch 翻转、强制音效音量等
+- **谱面视频渲染** — 游戏内离线渲染关卡为 MP4（集成自 [ADOFAI.EditorTweaks](https://github.com/memsys-lizi/ADOFAI.EditorTweaks)）
 
 <sub>Code by DeepSeek v4 Pro &amp; Trusler</sub>
 
@@ -67,6 +68,8 @@ Fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTw
 ### What changed
 
 The game underwent significant C# code refactoring during the Unity 6 upgrade, breaking many Harmony patches. This fork addresses all API changes and adds defensive error handling to prevent single-patch failures from crashing the entire mod.
+
+Also includes **Chart Rendering** (game-integrated level-to-MP4 export) from [ADOFAI.EditorTweaks](https://github.com/memsys-lizi/ADOFAI.EditorTweaks).
 
 ### Installation
 
