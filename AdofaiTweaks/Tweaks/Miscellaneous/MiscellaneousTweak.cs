@@ -15,6 +15,8 @@ namespace AdofaiTweaks.Tweaks.Miscellaneous;
     priority: 1000)]
 public class MiscellaneousTweak : Tweak
 {
+    private bool chartRenderInitialized;
+
     /// <inheritdoc/>
     public override string Name =>
         TweakStrings.Get(TranslationKeys.Miscellaneous.NAME);
@@ -92,6 +94,18 @@ public class MiscellaneousTweak : Tweak
                 TweakStrings.Get(TranslationKeys.Miscellaneous.SYNC_INPUT_STATE));
         }
 
+        // Chart rendering — lazy-init on reload if already enabled
+        if (!chartRenderInitialized && Settings.EnableChartRendering) {
+            chartRenderInitialized = true;
+            ChartRendering.ChartRenderMain.Settings = ChartRendering.ChartRenderingSettings.Load(ChartRendering.ChartRenderMain.Mod);
+            ChartRendering.ChartRenderMain.Settings.EnsureDefaults(ChartRendering.ChartRenderMain.Mod);
+            ChartRendering.ChartRenderMain.Settings.ShowEditorOverlay = true;
+            ChartRendering.ChartRenderMain.IsZh = AdofaiTweaks.GlobalSettings.Language.ToString() == "CHINESE_SIMPLIFIED";
+            ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
+            ChartRendering.ChartRenderPatcher.Enable();
+            ChartRendering.ChartRenderMain.Log("Chart rendering re-initialized on reload");
+        }
+
         // Chart rendering
         bool newChartRender = GUILayout.Toggle(
             Settings.EnableChartRendering,
@@ -105,10 +119,12 @@ public class MiscellaneousTweak : Tweak
                 ChartRendering.ChartRenderMain.IsZh = AdofaiTweaks.GlobalSettings.Language.ToString() == "CHINESE_SIMPLIFIED";
                 ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
                 ChartRendering.ChartRenderPatcher.Enable();
+                chartRenderInitialized = true;
                 ChartRendering.ChartRenderMain.Log("Chart rendering enabled: patches active, overlay visible");
             } else {
                 ChartRendering.ChartRenderPatcher.Disable();
                 ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Destroy();
+                chartRenderInitialized = false;
                 ChartRendering.ChartRenderMain.Log("Chart rendering disabled");
             }
         }
