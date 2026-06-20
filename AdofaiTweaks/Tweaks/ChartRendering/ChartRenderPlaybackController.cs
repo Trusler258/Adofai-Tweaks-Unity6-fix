@@ -55,8 +55,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor != null && (editor.playMode || !editor.inStrictlyEditingMode))
+                if (editor != null)
                 {
+                    // Force-reload: go to edit mode, then restart play
                     editor.SwitchToEditMode();
                 }
             }
