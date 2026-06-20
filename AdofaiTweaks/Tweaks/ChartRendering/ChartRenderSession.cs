@@ -68,19 +68,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         public void Cancel()
         {
             cancelRequested = true;
-            IsRendering = false;
-            IsAutoPlaybackReady = false;
-            ChartRenderVisualClock.End();
-
-            // Stop audio and auto-play
-            RDC.auto = false;
-
-            // Immediately restore editor mode and reset frame timing
-            RestoreState();
-            // Force reset frame control
-            Time.captureFramerate = 0;
-            QualitySettings.vSyncCount = 1;
-            Application.targetFrameRate = -1;
         }
 
         public IEnumerator Run(Action<ChartRenderResult> onComplete)
@@ -274,7 +261,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
             if (cancelRequested)
             {
-                IsRendering = false;
                 result.Success = false;
                 result.Message = "Canceled.";
                 Cleanup(frameCapture, encoder, restoreEditor: false, deleteTemp: true);
@@ -284,7 +270,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
             if (failure != null)
             {
-                IsRendering = false;
                 result.Success = false;
                 result.Message = failure.Message;
                 Cleanup(frameCapture, encoder, restoreEditor: false, deleteTemp: true);
@@ -390,9 +375,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsRendering = false;
             ChartRenderVisualClock.End();
             RestoreState();
-            // Force reset frame control
-            Time.captureFramerate = 0;
-            Application.targetFrameRate = -1;
             ChartRenderDiagnostics.End();
             onComplete(result);
         }

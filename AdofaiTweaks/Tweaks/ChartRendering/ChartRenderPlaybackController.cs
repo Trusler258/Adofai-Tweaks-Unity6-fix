@@ -50,11 +50,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 return;
             }
 
-            // 1. First exit playback mode unconditionally
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor != null)
+                if (editor != null && (editor.playMode || !editor.inStrictlyEditingMode))
                 {
                     editor.SwitchToEditMode();
                 }
@@ -64,7 +63,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 ChartRenderMain.Log("Failed to switch back to edit mode: " + ex.Message);
             }
 
-            // 2. Now restore saved state (auto, checkpoint, framerate, selected floor)
             savedState.Restore();
         }
 
