@@ -142,6 +142,7 @@ public static class AdofaiTweaks
             bool click = GUILayout.Button(langString, style);
             if (click) {
                 GlobalSettings.Language = language;
+                Tweaks.ChartRendering.ChartRenderMain.IsZh = language.ToString() == "CHINESE_SIMPLIFIED";
                 foreach (TweakRunner runner in tweakRunners) {
                     runner.OnLanguageChange();
                 }

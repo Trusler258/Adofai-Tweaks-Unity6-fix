@@ -99,10 +99,17 @@ public class MiscellaneousTweak : Tweak
         if (newChartRender != Settings.EnableChartRendering) {
             Settings.EnableChartRendering = newChartRender;
             if (newChartRender) {
+                ChartRendering.ChartRenderMain.Settings = ChartRendering.ChartRenderingSettings.Load(ChartRendering.ChartRenderMain.Mod);
+                ChartRendering.ChartRenderMain.Settings.EnsureDefaults(ChartRendering.ChartRenderMain.Mod);
                 ChartRendering.ChartRenderMain.Settings.ShowEditorOverlay = true;
+                ChartRendering.ChartRenderMain.IsZh = AdofaiTweaks.GlobalSettings.Language.ToString() == "CHINESE_SIMPLIFIED";
                 ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Ensure();
+                ChartRendering.ChartRenderPatcher.Enable();
+                ChartRendering.ChartRenderMain.Log("Chart rendering enabled: patches active, overlay visible");
             } else {
+                ChartRendering.ChartRenderPatcher.Disable();
                 ChartRendering.EditorOverlay.EditorTweaksOverlayWindow.Destroy();
+                ChartRendering.ChartRenderMain.Log("Chart rendering disabled");
             }
         }
 

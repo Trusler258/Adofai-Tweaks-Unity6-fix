@@ -225,6 +225,7 @@
     <Compile Include="Tweaks\ChartRendering\ChartRenderJudgmentPatches.cs" />
     <Compile Include="Tweaks\ChartRendering\ChartRenderMemoryBudget.cs" />
     <Compile Include="Tweaks\ChartRendering\ChartRenderOptionValues.cs" />
+    <Compile Include="Tweaks\ChartRendering\ChartRenderPatcher.cs" />
     <Compile Include="Tweaks\ChartRendering\ChartRenderPaths.cs" />
     <Compile Include="Tweaks\ChartRendering\ChartRenderPlaybackController.cs" />
     <Compile Include="Tweaks\ChartRendering\ChartRenderProgressModel.cs" />

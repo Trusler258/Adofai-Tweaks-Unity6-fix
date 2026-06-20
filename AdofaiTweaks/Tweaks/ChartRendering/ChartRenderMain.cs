@@ -20,6 +20,11 @@ public static class ChartRenderMain
     public static ChartRenderingSettings Settings { get; set; } = new ChartRenderingSettings();
 
     /// <summary>
+    /// Whether the current language is Chinese Simplified.
+    /// </summary>
+    public static bool IsZh { get; set; }
+
+    /// <summary>
     /// Logger wrapper using AdofaiTweaks.Logger.
     /// </summary>
     public static void Log(string message)
