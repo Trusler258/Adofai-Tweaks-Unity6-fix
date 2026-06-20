@@ -50,24 +50,20 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 return;
             }
 
+            savedState.Restore();
+
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor != null)
+                if (editor != null && (editor.playMode || !editor.inStrictlyEditingMode))
                 {
-                    // Restart the level fresh — reliable recovery from render state
-                    editor.SelectFloor(editor.floors[0], cameraJump: false);
-                    GCS.checkpointNum = 0;
-                    RDC.auto = false;
                     editor.SwitchToEditMode();
                 }
             }
             catch (Exception ex)
             {
-                ChartRenderMain.Log("Failed to restore editor after render: " + ex.Message);
+                ChartRenderMain.Log("Failed to switch back to edit mode: " + ex.Message);
             }
-
-            savedState.Restore();
         }
 
         public static bool IsPlayableLevelLoaded()
