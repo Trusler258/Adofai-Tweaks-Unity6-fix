@@ -72,9 +72,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsAutoPlaybackReady = false;
             ChartRenderVisualClock.End();
 
+            // Stop audio and auto-play
+            RDC.auto = false;
+
             // Immediately restore editor mode and reset frame timing
             RestoreState();
-            // Force reset frame control in case saved state restore missed
+            // Force reset frame control
             Time.captureFramerate = 0;
             QualitySettings.vSyncCount = 1;
             Application.targetFrameRate = -1;

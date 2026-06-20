@@ -50,21 +50,13 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 return;
             }
 
-            // Always restore time/framerate regardless of editor state
-            savedState.Restore();
-
+            // 1. First exit playback mode unconditionally
             try
             {
                 scnEditor editor = ADOBase.editor;
-                if (editor == null) return;
-
-                // Force exit playback mode — call multiple times if needed
-                if (editor.playMode || !editor.inStrictlyEditingMode)
+                if (editor != null)
                 {
                     editor.SwitchToEditMode();
-                    // Second attempt after short delay sometimes needed
-                    if (editor.playMode)
-                        editor.SwitchToEditMode();
                 }
             }
             catch (Exception ex)
@@ -72,6 +64,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 ChartRenderMain.Log("Failed to switch back to edit mode: " + ex.Message);
             }
 
+            // 2. Now restore saved state (auto, checkpoint, framerate, selected floor)
             savedState.Restore();
         }
 
