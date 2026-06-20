@@ -49,6 +49,15 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         private void OnGUI()
         {
+            // ESC during rendering = cancel and return to editor
+            if (chartRenderSession != null && chartRenderSession.IsActive && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+            {
+                chartRenderSession.Cancel();
+                chartRenderSession = null;
+                Event.current.Use();
+                return;
+            }
+
             mouseOverOverlay = false;
             if (!ShouldDraw()) return;
             float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : ExpandedH;
