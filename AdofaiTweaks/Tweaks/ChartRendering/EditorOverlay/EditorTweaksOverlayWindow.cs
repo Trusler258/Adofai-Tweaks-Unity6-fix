@@ -255,6 +255,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (GUI.Button(new Rect(14, y, fw, 28), T("取消渲染")))
             {
                 s.Cancel();
+                chartRenderSession = null;
             }
             GUI.backgroundColor = Color.white;
         }

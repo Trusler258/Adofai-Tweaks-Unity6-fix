@@ -68,6 +68,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         public void Cancel()
         {
             cancelRequested = true;
+            IsRendering = false;
+            // Immediately restore editor mode — don't wait for coroutine to drain frames
+            RestoreState();
         }
 
         public IEnumerator Run(Action<ChartRenderResult> onComplete)
