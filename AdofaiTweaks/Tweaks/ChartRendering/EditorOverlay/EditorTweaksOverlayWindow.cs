@@ -9,7 +9,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 610f;
+        private const float ExpandedH = 640f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseOverOverlay;
@@ -166,6 +166,16 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             int ns = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), sel, modes, modes.Length);
             if (ns != sel) { ChartRenderMain.Settings.ChartRenderEncoderMode = modes[ns]; SaveSettings(); }
 
+            y += 30;
+            // Preview mode
+            GUI.Label(new Rect(14, y, lw, 22), T("预览"));
+            string[] pvModes = { "完整", "暗淡", "关闭" };
+            string[] pvVals = { "full", "dim", "minimal" };
+            int pvSel = Array.IndexOf(pvVals, ChartRenderMain.Settings.ChartRenderPreviewMode);
+            if (pvSel < 0) pvSel = 0;
+            int pvNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), pvSel, pvModes, 3);
+            if (pvNew != pvSel) { ChartRenderMain.Settings.ChartRenderPreviewMode = pvVals[pvNew]; SaveSettings(); }
+
             y += 38;
             // Status
             string reason = GetDisabledReason();
@@ -241,6 +251,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "游戏" => "Game",
             "码率模式" => "Rate Control",
             "码率(Mbps)" => "Bitrate(Mbps)",
+            "预览" => "Preview",
             "完成: " => "Done: ", "失败: " => "Failed: ",
             _ => zh
         };
