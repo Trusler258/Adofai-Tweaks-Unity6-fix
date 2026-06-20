@@ -56,9 +56,17 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             windowRect.width = Width;
             windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
 
-            // Capture mouse if pointer is over the full window rect
-            Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            if (windowRect.Contains(mouse))
+            // Capture mouse if pointer is over the window, or if we're currently dragging it
+            if (GUIUtility.hotControl == WindowId)
+            {
+                mouseOverOverlay = true;
+            }
+            else
+            {
+                Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                if (windowRect.Contains(mouse))
+                    mouseOverOverlay = true;
+            }
                 mouseOverOverlay = true;
         }
 
