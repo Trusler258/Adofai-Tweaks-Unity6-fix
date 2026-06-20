@@ -9,7 +9,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 640f;
+        private const float ExpandedH = 650f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseOverOverlay;
@@ -185,24 +185,29 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (pvNew != pvSel) { ChartRenderMain.Settings.ChartRenderPreviewMode = pvVals[pvNew]; SaveSettings(); }
 
             y += 38;
-            // Status
-            string reason = GetDisabledReason();
-            bool canRender = string.IsNullOrEmpty(reason) && !renderActive;
-            string status = renderActive ? T("渲染中...")
-                : (!string.IsNullOrEmpty(chartRenderMessage) ? chartRenderMessage
-                : (canRender ? T("就绪，点击开始渲染") : reason));
-            GUI.Label(new Rect(14, y, Width - 28, 40), status);
-
-            y += 50;
-            // Render button
-            GUI.enabled = canRender;
-            GUI.backgroundColor = canRender ? new Color(0.3f, 0.7f, 0.3f) : Color.gray;
-            if (GUI.Button(new Rect(14, y, Width - 28, 36), T("开始渲染")))
+            // Status / Progress
+            if (renderActive && chartRenderSession != null)
             {
-                StartChartRender();
+                DrawProgress(y);
             }
-            GUI.backgroundColor = Color.white;
-            GUI.enabled = true;
+            else
+            {
+                string reason = GetDisabledReason();
+                bool canRender = string.IsNullOrEmpty(reason) && !renderActive;
+                string status = (!string.IsNullOrEmpty(chartRenderMessage) ? chartRenderMessage
+                    : (canRender ? T("就绪，点击开始渲染") : reason));
+                GUI.Label(new Rect(14, y, Width - 28, 40), status);
+
+                y += 50;
+                GUI.enabled = canRender;
+                GUI.backgroundColor = canRender ? new Color(0.3f, 0.7f, 0.3f) : Color.gray;
+                if (GUI.Button(new Rect(14, y, Width - 28, 36), T("开始渲染")))
+                {
+                    StartChartRender();
+                }
+                GUI.backgroundColor = Color.white;
+                GUI.enabled = true;
+            }
 
             y += 44;
             GUI.Label(new Rect(14, y, Width - 28, 18), GetProfileText());
@@ -213,6 +218,45 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             var s = ChartRenderMain.Settings;
             string rc = s.ChartRenderRateControl == "crf" ? "CRF:" + s.ChartRenderCrf : s.ChartRenderRateControl.ToUpper() + " " + s.ChartRenderBitrateMbps.ToString("0.#") + "M";
             return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps  {rc}";
+        }
+
+        private void DrawProgress(float y)
+        {
+            var s = chartRenderSession;
+            float pct = Mathf.Clamp01(s.Progress);
+            float fw = Width - 28;
+            int wf = s.WrittenFrames, tf = s.TotalFrames;
+            double fps = s.ProcessingFps;
+            var eta = s.EstimatedRemaining;
+
+            // Progress bar
+            var barRect = new Rect(14, y, fw, 20);
+            GUI.Box(barRect, "");
+            var fillRect = new Rect(14, y, fw * pct, 20);
+            GUI.Box(fillRect, "");
+            GUI.Label(barRect, $"  {wf} / {tf}  ({pct * 100f:F0}%)");
+
+            y += 24;
+            string stageDisplay = s.StageText;
+            // Translate known stage keys or use as-is
+            GUI.Label(new Rect(14, y, fw, 20), T("步骤") + ": " + stageDisplay);
+
+            y += 20;
+            string fpsStr = fps > 0.5 ? fps.ToString("F1") + " fps" : "-- fps";
+            string etaStr = eta.TotalSeconds > 0.1 ? eta.Minutes + "m " + eta.Seconds + "s" : "--";
+            GUI.Label(new Rect(14, y, fw, 20), fpsStr + "  |  ETA: " + etaStr + "  |  " + s.DuplicateFrames + T(" 重复帧"));
+
+            y += 20;
+            GUI.Label(new Rect(14, y, fw, 20), s.DetailText);
+
+            // Cancel button
+            y += 26;
+            GUI.backgroundColor = new Color(0.8f, 0.3f, 0.3f);
+            if (GUI.Button(new Rect(14, y, fw, 28), T("取消渲染")))
+            {
+                s.Cancel();
+            }
+            GUI.backgroundColor = Color.white;
         }
 
         private static string GetDisabledReason()
@@ -260,6 +304,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "码率模式" => "Rate Control",
             "码率(Mbps)" => "Bitrate(Mbps)",
             "预览" => "Preview",
+            "步骤" => "Step",
+            "取消渲染" => "Cancel Render",
+            " 重复帧" => " dup",
             "完成: " => "Done: ", "失败: " => "Failed: ",
             _ => zh
         };

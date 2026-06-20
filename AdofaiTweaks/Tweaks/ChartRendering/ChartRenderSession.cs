@@ -53,11 +53,11 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
 
         public int DuplicateFrames => progress.DuplicateFrames;
 
-        public float DuplicateRatio => progress.DuplicateRatio;
-
         public double ProcessingFps => progress.ProcessingFps;
 
         public TimeSpan EstimatedRemaining => progress.EstimatedRemaining;
+
+        public float DuplicateRatio => progress.DuplicateRatio;
 
         public string SmoothnessText => progress.SmoothnessText;
 
