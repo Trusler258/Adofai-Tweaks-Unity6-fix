@@ -197,6 +197,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             while (requestedFrames < renderFrameLimit && !cancelRequested && failure == null)
             {
                 ChartRenderDiagnostics.SetFrame(requestedFrames);
+                if (!Try(() => framePipeline!.WaitForPendingSlot(encoder!, () => cancelRequested), out failure))
+                {
+                    break;
+                }
 
                 if (failure != null || cancelRequested)
                 {
@@ -208,12 +212,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 if (!Try(() =>
                 {
                     audioCapture!.CaptureFrame();
-                    // Synchronous: wait for GPU to finish rendering this frame
-                    framePipeline!.RequestFrameSync(frameCapture!, requestedFrames, encoder!, () => cancelRequested);
+                    framePipeline!.RequestFrame(frameCapture!, requestedFrames);
                     requestedFrames++;
                     progress.UpdateFrames(framePipeline!.WrittenFrames, framePipeline!.DuplicateFrames);
                     SetForcedFrameTimeFromAudioCursor(requestedFrames);
                     ChartRenderDiagnostics.LogFrame(requestedFrames, renderFrameLimit);
+                    DrainReadyFrames(framePipeline!, encoder!);
                     if (completionFrame < 0 && HasReachedLevelEnd())
                     {
                         completionFrame = requestedFrames;
@@ -230,11 +234,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                     break;
                 }
 
-                if (cancelRequested) break;
                 DetailText = Path.GetFileName(outputPath);
             }
 
-            // Drain any remaining pending frames (should be none in sync mode)
             while (framePipeline != null && framePipeline.PendingCount > 0 && !cancelRequested && failure == null)
             {
                 if (!Try(() => DrainReadyFrames(framePipeline!, encoder!), out failure))
