@@ -36,6 +36,32 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             pendingFrames.Enqueue(frameCapture.RequestFrame(index));
         }
 
+        /// <summary>Request one frame and synchronously wait for GPU to finish, then drain immediately.</summary>
+        public void RequestFrameSync(ChartFrameCapture frameCapture, int index, FfmpegEncoder encoder, Func<bool> isCancelRequested)
+        {
+            var pending = frameCapture.RequestFrame(index);
+            // Wait for GPU readback to complete
+            while (!pending.Done && !isCancelRequested())
+            {
+                Thread.Sleep(1);
+            }
+            if (isCancelRequested()) return;
+
+            byte[] buffer = RentFrameBuffer();
+            try
+            {
+                pending.Complete(buffer);
+                encoder.WriteFrame(buffer, pending.ByteLength, pending.RepeatCount, ReturnFrameBuffer, isCancelRequested);
+                buffer = null!;
+            }
+            finally
+            {
+                if (buffer != null) ReturnFrameBuffer(buffer);
+            }
+            WrittenFrames += pending.RepeatCount;
+            DuplicateFrames += Math.Max(0, pending.RepeatCount - 1);
+        }
+
         public void DrainReadyFrames(FfmpegEncoder encoder, Func<bool> isCancelRequested)
         {
             while (pendingFrames.Count > 0 && pendingFrames.Peek().Done)
