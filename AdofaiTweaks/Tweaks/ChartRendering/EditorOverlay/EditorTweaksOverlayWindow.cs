@@ -137,10 +137,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
             if (ChartRenderMain.Settings.EditorOverlayCollapsed) return;
 
-            // Only do expensive layout on Repaint to avoid FPS halving
-            if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout)
-                return;
-
             float y = 40;
             float lw = 100, vw = Width - lw - 50;
 
