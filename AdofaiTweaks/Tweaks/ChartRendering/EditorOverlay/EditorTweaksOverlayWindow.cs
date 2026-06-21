@@ -9,13 +9,15 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 650f;
+        private const float ExpandedH = 620f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseOverOverlay;
         private Rect windowRect;
         private ChartRenderSession chartRenderSession;
         private string chartRenderMessage;
+        private bool cursorWasVisible;
+        private CursorLockMode cursorWasLocked;
 
         public static void Ensure()
         {
@@ -35,7 +37,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         private static bool IsRenderActive => instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive;
 
-        // Gameplay input (ESC, space, etc.) only blocked during active render — never just because mouse is over overlay
         public static bool ShouldBlockEditorInput() => IsRenderActive || mouseOverOverlay;
         public static bool ShouldBlockMouseInput() => mouseOverOverlay;
         public static bool ShouldBlockGameplayInput() => IsRenderActive;
@@ -57,20 +58,18 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : ExpandedH;
             windowRect.height = h;
             windowRect.width = Width;
-            windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
 
-            // Capture mouse if pointer is over the window, or if we're currently dragging it
-            if (GUIUtility.hotControl == WindowId)
+            // Consume mouse events when over overlay to prevent click passthrough to chart
+            Vector2 guiMouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            if (windowRect.Contains(guiMouse))
             {
                 mouseOverOverlay = true;
+                Event e = Event.current;
+                if (e.isMouse || e.type == EventType.ScrollWheel)
+                    e.Use();
             }
-            else
-            {
-                Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-                if (windowRect.Contains(mouse))
-                    mouseOverOverlay = true;
-            }
-                mouseOverOverlay = true;
+
+            windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
         }
 
         private static bool ShouldDraw()
@@ -95,6 +94,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
             if (ChartRenderMain.Settings.EditorOverlayCollapsed) return;
 
+            // Only do expensive layout on Repaint to avoid FPS halving
+            if (Event.current.type != EventType.Repaint && Event.current.type != EventType.Layout)
+                return;
+
             float y = 40;
             float lw = 100, vw = Width - lw - 50;
 
@@ -111,7 +114,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (GUI.Button(new Rect(Width - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "ADOFAI Renders"); SaveSettings(); }
 
             y += 38;
-            // === Video Settings ===
             // Width / Height
             GUI.Label(new Rect(14, y, lw, 22), T("宽度"));
             var ws = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderWidth.ToString());
@@ -124,12 +126,15 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             y += 30;
             // FPS / CRF
             GUI.Label(new Rect(14, y, lw, 22), T("帧率"));
-            var fs = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
+            var fs = GUI.TextField(new Rect(lw + 10, y, 50, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
             if (int.TryParse(fs, out int fv)) { ChartRenderMain.Settings.ChartRenderFps = Mathf.Clamp(fv, 1, 240); SaveSettings(); }
 
-            GUI.Label(new Rect(lw + 80, y, 40, 22), T("CRF"));
-            var cs = GUI.TextField(new Rect(lw + 120, y, 60, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
+            GUI.Label(new Rect(lw + 70, y, 35, 22), T("CRF"));
+            var cs = GUI.TextField(new Rect(lw + 105, y, 50, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
             if (int.TryParse(cs, out int cv)) { ChartRenderMain.Settings.ChartRenderCrf = Mathf.Clamp(cv, 0, 51); SaveSettings(); }
+
+            // Profile text inline next to CRF
+            GUI.Label(new Rect(lw + 165, y, vw + 85, 22), GetProfileText());
 
             y += 30;
             // Tail / Judgments
@@ -211,16 +216,13 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
                 GUI.backgroundColor = Color.white;
                 GUI.enabled = true;
             }
-
-            y += 44;
-            GUI.Label(new Rect(14, y, Width - 28, 18), GetProfileText());
         }
 
         private static string GetProfileText()
         {
             var s = ChartRenderMain.Settings;
             string rc = s.ChartRenderRateControl == "crf" ? "CRF:" + s.ChartRenderCrf : s.ChartRenderRateControl.ToUpper() + " " + s.ChartRenderBitrateMbps.ToString("0.#") + "M";
-            return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps  {rc}";
+            return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps {rc}";
         }
 
         private void DrawProgress(float y)
@@ -240,9 +242,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             GUI.Label(barRect, $"  {wf} / {tf}  ({pct * 100f:F0}%)");
 
             y += 24;
-            string stageDisplay = s.StageText;
-            // Translate known stage keys or use as-is
-            GUI.Label(new Rect(14, y, fw, 20), T("步骤") + ": " + stageDisplay);
+            GUI.Label(new Rect(14, y, fw, 20), T("步骤") + ": " + s.StageText);
 
             y += 20;
             string fpsStr = fps > 0.5 ? fps.ToString("F1") + " fps" : "-- fps";
@@ -280,9 +280,20 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         {
             chartRenderMessage = string.Empty;
             ChartRenderMain.Settings.EnsureDefaults(ChartRenderMain.Mod);
+
+            // Show cursor during render even if game setting hides it
+            cursorWasVisible = Cursor.visible;
+            cursorWasLocked = Cursor.lockState;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+
             chartRenderSession = new ChartRenderSession(ChartRenderMain.Mod, ChartRenderMain.Settings);
             StartCoroutine(chartRenderSession.Run(result =>
             {
+                // Restore cursor state
+                Cursor.visible = cursorWasVisible;
+                Cursor.lockState = cursorWasLocked;
+
                 chartRenderMessage = result.Success
                     ? T("完成: ") + result.OutputPath
                     : T("失败: ") + result.Message;
