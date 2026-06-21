@@ -7,9 +7,11 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
     internal sealed class EditorTweaksOverlayWindow : MonoBehaviour
     {
         private const int WindowId = 0x7E71A01;
-        private const float Width = 400f;
+        private const float MinWidth = 320f;
+        private const float MaxWidth = 800f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 700f;
+        private const float BaseExpandedH = 720f;
+        private const float ResizeHandleSize = 12f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseCapturedByOverlay;
@@ -19,6 +21,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private string chartRenderMessage;
         private bool cursorWasVisible;
         private CursorLockMode cursorWasLocked;
+        private bool isResizing;
+        private Vector2 resizeStartMouse;
+        private Rect resizeStartRect;
+        private bool overResizeHandle;
 
         public static void Ensure()
         {
@@ -45,7 +51,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         public static bool ShouldBlockMouseInput()
         {
-            // Release stale captures
             if (mouseCaptureReleaseFrame >= 0 && Time.frameCount > mouseCaptureReleaseFrame)
             {
                 mouseCapturedByOverlay = false;
@@ -65,14 +70,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             bool mouseHeld = IsAnyMouseButtonHeld();
             bool mouseActivity = mouseDown || mouseUp || mouseHeld || HasMouseWheelActivity();
 
-            // Capture mouse on click inside overlay
             if (mouseDown)
                 mouseCapturedByOverlay = insideOverlay;
 
             bool capturedThisFrame = mouseCapturedByOverlay || mouseCaptureReleaseFrame == Time.frameCount;
             bool block = mouseActivity && (insideOverlay || capturedThisFrame);
 
-            // Release capture one frame after mouse up
             if (mouseUp && mouseCapturedByOverlay && !mouseHeld)
                 mouseCaptureReleaseFrame = Time.frameCount;
 
@@ -99,20 +102,82 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         private void Awake()
         {
+            float savedW = ChartRenderMain.Settings.EditorOverlayWidth;
             float x = ChartRenderMain.Settings.EditorOverlayX;
             float y = ChartRenderMain.Settings.EditorOverlayY;
-            if (x < 0) x = Screen.width - Width - 20;
+            if (savedW < MinWidth) savedW = MinWidth;
+            if (x < 0) x = Screen.width - savedW - 20;
             if (y < 0) y = 80;
-            windowRect = new Rect(x, y, Width, CollapsedH);
+            windowRect = new Rect(x, y, savedW, CollapsedH);
         }
 
         private void OnGUI()
         {
             if (!ShouldDraw()) return;
-            float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : ExpandedH;
-            windowRect.height = h;
-            windowRect.width = Width;
+
+            // Resize handle logic
+            HandleResize();
+
+            float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : GetExpandedHeight();
+            if (!isResizing)
+            {
+                windowRect.height = h;
+                windowRect.width = Mathf.Clamp(windowRect.width, MinWidth, MaxWidth);
+            }
+
             windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
+        }
+
+        private float GetExpandedHeight()
+        {
+            float extra = ChartRenderMain.Settings.ChartRenderAdvancedSettingsExpanded ? 120f : 0f;
+            return BaseExpandedH + extra;
+        }
+
+        private void HandleResize()
+        {
+            Vector2 guiMouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            float br = ResizeHandleSize;
+            Rect handleRect = new Rect(windowRect.xMax - br, windowRect.yMax - br, br, br);
+
+            if (Event.current.type == EventType.Repaint)
+            {
+                overResizeHandle = handleRect.Contains(guiMouse);
+            }
+
+            if (Event.current.isMouse && Event.current.type == EventType.MouseDown && overResizeHandle)
+            {
+                isResizing = true;
+                resizeStartMouse = guiMouse;
+                resizeStartRect = windowRect;
+                Event.current.Use();
+            }
+
+            if (isResizing)
+            {
+                if (Event.current.isMouse && Event.current.rawType == EventType.MouseUp)
+                {
+                    isResizing = false;
+                    SaveWindowSize();
+                    Event.current.Use();
+                }
+                else if (Event.current.isMouse)
+                {
+                    float dw = guiMouse.x - resizeStartMouse.x;
+                    float dh = guiMouse.y - resizeStartMouse.y;
+                    windowRect.width = Mathf.Clamp(resizeStartRect.width + dw, MinWidth, MaxWidth);
+                    windowRect.height = Mathf.Max(resizeStartRect.height + dh, CollapsedH);
+                    Event.current.Use();
+                }
+            }
+        }
+
+        private void SaveWindowSize()
+        {
+            ChartRenderMain.Settings.EditorOverlayX = windowRect.x;
+            ChartRenderMain.Settings.EditorOverlayY = windowRect.y;
+            ChartRenderMain.Settings.EditorOverlayWidth = windowRect.width;
+            ChartRenderMain.Settings.Save(ChartRenderMain.Mod);
         }
 
         private static bool ShouldDraw()
@@ -124,73 +189,85 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private void DrawWindow(int id)
         {
             bool renderActive = chartRenderSession != null && chartRenderSession.IsActive;
+            float w = windowRect.width;
 
-            // Collapse button
-            if (GUI.Button(new Rect(Width - 30, 4, 22, 22), ChartRenderMain.Settings.EditorOverlayCollapsed ? "+" : "-"))
+            // Title bar buttons
+            GUI.backgroundColor = Color.clear;
+            if (GUI.Button(new Rect(w - 30, 4, 22, 22), ChartRenderMain.Settings.EditorOverlayCollapsed ? "+" : "-"))
             {
                 ChartRenderMain.Settings.EditorOverlayCollapsed = !ChartRenderMain.Settings.EditorOverlayCollapsed;
                 SaveSettings();
             }
 
             // Drag header
-            GUI.DragWindow(new Rect(0, 0, Width - 36, CollapsedH));
+            GUI.DragWindow(new Rect(0, 0, w - 52, CollapsedH));
 
             if (ChartRenderMain.Settings.EditorOverlayCollapsed) return;
 
             float y = 40;
-            float lw = 100, vw = Width - lw - 50;
+            float lw = Mathf.Clamp(w * 0.22f, 72f, 110f);
+            float cw = w - lw - 28f;
+            bool narrow = w < 380f;
 
             // === Output Paths ===
-            GUI.Label(new Rect(14, y, lw, 22), T("工作目录"));
-            string workspace = GUI.TextField(new Rect(lw + 10, y, vw - 30, 22), ChartRenderMain.Settings.ChartRenderWorkspaceDirectory);
+            if (!narrow) GUI.Label(new Rect(14, y, lw, 22), T("工作目录"));
+            else GUI.Label(new Rect(14, y, 60, 22), T("工作目录"));
+            string workspace = GUI.TextField(new Rect(lw + 10, y, cw - 30, 22), ChartRenderMain.Settings.ChartRenderWorkspaceDirectory);
             if (workspace != ChartRenderMain.Settings.ChartRenderWorkspaceDirectory) { ChartRenderMain.Settings.ChartRenderWorkspaceDirectory = workspace; SaveSettings(); }
-            if (GUI.Button(new Rect(Width - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderWorkspaceDirectory = Path.Combine(ChartRenderMain.Mod.Path, "Workspace"); SaveSettings(); }
+            if (GUI.Button(new Rect(w - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderWorkspaceDirectory = Path.Combine(ChartRenderMain.Mod.Path, "Workspace"); SaveSettings(); }
 
             y += 28;
-            GUI.Label(new Rect(14, y, lw, 22), T("导出目录"));
-            string export = GUI.TextField(new Rect(lw + 10, y, vw - 30, 22), ChartRenderMain.Settings.ChartRenderExportDirectory);
+            if (!narrow) GUI.Label(new Rect(14, y, lw, 22), T("导出目录"));
+            else GUI.Label(new Rect(14, y, 60, 22), T("导出目录"));
+            string export = GUI.TextField(new Rect(lw + 10, y, cw - 30, 22), ChartRenderMain.Settings.ChartRenderExportDirectory);
             if (export != ChartRenderMain.Settings.ChartRenderExportDirectory) { ChartRenderMain.Settings.ChartRenderExportDirectory = export; SaveSettings(); }
-            if (GUI.Button(new Rect(Width - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "ADOFAI Renders"); SaveSettings(); }
+            if (GUI.Button(new Rect(w - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "ADOFAI Renders"); SaveSettings(); }
 
-            y += 38;
+            y += 34;
             // Width / Height with presets
-            GUI.Label(new Rect(14, y, lw, 22), T("宽度"));
-            var ws = GUI.TextField(new Rect(lw + 10, y, 50, 22), ChartRenderMain.Settings.ChartRenderWidth.ToString());
+            float hw = narrow ? 45f : 50f;
+            GUI.Label(new Rect(14, y, narrow ? 36f : lw, 22), narrow ? "W" : T("宽度"));
+            var ws = GUI.TextField(new Rect(lw + 10, y, hw, 22), ChartRenderMain.Settings.ChartRenderWidth.ToString());
             if (int.TryParse(ws, out int wv)) { ChartRenderMain.Settings.ChartRenderWidth = Mathf.Clamp(wv, 16, 7680); SaveSettings(); }
 
-            GUI.Label(new Rect(lw + 70, y, 35, 22), T("高度"));
-            var hs = GUI.TextField(new Rect(lw + 105, y, 50, 22), ChartRenderMain.Settings.ChartRenderHeight.ToString());
+            float hx = lw + hw + 16;
+            GUI.Label(new Rect(hx, y, narrow ? 14f : 35, 22), narrow ? "H" : T("高度"));
+            var hs = GUI.TextField(new Rect(hx + (narrow ? 18f : 35f), y, hw, 22), ChartRenderMain.Settings.ChartRenderHeight.ToString());
             if (int.TryParse(hs, out int hv)) { ChartRenderMain.Settings.ChartRenderHeight = Mathf.Clamp(hv, 16, 4320); SaveSettings(); }
 
             // Resolution presets
-            if (GUI.Button(new Rect(lw + 165, y, 35, 22), "1K")) { ChartRenderMain.Settings.ChartRenderWidth = 1920; ChartRenderMain.Settings.ChartRenderHeight = 1080; SaveSettings(); }
-            if (GUI.Button(new Rect(lw + 202, y, 30, 22), "2K")) { ChartRenderMain.Settings.ChartRenderWidth = 2560; ChartRenderMain.Settings.ChartRenderHeight = 1440; SaveSettings(); }
-            if (GUI.Button(new Rect(lw + 234, y, 30, 22), "4K")) { ChartRenderMain.Settings.ChartRenderWidth = 3840; ChartRenderMain.Settings.ChartRenderHeight = 2160; SaveSettings(); }
+            float px = hx + (narrow ? 18f : 35f) + hw + 8;
+            GUI.skin.button.fontSize = 10;
+            if (GUI.Button(new Rect(px, y, 28, 22), "1K")) { ChartRenderMain.Settings.ChartRenderWidth = 1920; ChartRenderMain.Settings.ChartRenderHeight = 1080; SaveSettings(); }
+            if (GUI.Button(new Rect(px + 30, y, 28, 22), "2K")) { ChartRenderMain.Settings.ChartRenderWidth = 2560; ChartRenderMain.Settings.ChartRenderHeight = 1440; SaveSettings(); }
+            if (GUI.Button(new Rect(px + 60, y, 28, 22), "4K")) { ChartRenderMain.Settings.ChartRenderWidth = 3840; ChartRenderMain.Settings.ChartRenderHeight = 2160; SaveSettings(); }
+            GUI.skin.button.fontSize = 11;
 
             y += 30;
             // FPS / CRF with presets
-            GUI.Label(new Rect(14, y, lw, 22), T("帧率"));
+            GUI.Label(new Rect(14, y, narrow ? 36f : lw, 22), narrow ? "FPS" : T("帧率"));
             var fs = GUI.TextField(new Rect(lw + 10, y, 40, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
             if (int.TryParse(fs, out int fv)) { ChartRenderMain.Settings.ChartRenderFps = Mathf.Clamp(fv, 1, 240); SaveSettings(); }
 
+            GUI.skin.button.fontSize = 10;
             if (GUI.Button(new Rect(lw + 54, y, 28, 22), "30")) { ChartRenderMain.Settings.ChartRenderFps = 30; SaveSettings(); }
             if (GUI.Button(new Rect(lw + 84, y, 28, 22), "60")) { ChartRenderMain.Settings.ChartRenderFps = 60; SaveSettings(); }
             if (GUI.Button(new Rect(lw + 114, y, 28, 22), "120")) { ChartRenderMain.Settings.ChartRenderFps = 120; SaveSettings(); }
+            GUI.skin.button.fontSize = 11;
 
             GUI.Label(new Rect(lw + 150, y, 35, 22), T("CRF"));
             var cs = GUI.TextField(new Rect(lw + 185, y, 40, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
             if (int.TryParse(cs, out int cv)) { ChartRenderMain.Settings.ChartRenderCrf = Mathf.Clamp(cv, 0, 51); SaveSettings(); }
 
-            // Profile text inline
-            GUI.Label(new Rect(lw + 230, y, 160, 22), GetProfileText());
+            GUI.Label(new Rect(lw + 230, y, w - lw - 240, 22), GetProfileText());
 
             y += 30;
             // Tail / Judgments
-            GUI.Label(new Rect(14, y, lw, 22), T("尾巴(秒)"));
+            GUI.Label(new Rect(14, y, narrow ? 50f : lw, 22), T("尾巴(秒)"));
             var ts = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderCompletionTailSeconds.ToString("0.0"));
             if (float.TryParse(ts, out float tv)) { ChartRenderMain.Settings.ChartRenderCompletionTailSeconds = Mathf.Clamp(tv, 0, 30); SaveSettings(); }
 
-            bool showJ = GUI.Toggle(new Rect(lw + 80, y, vw - 60, 22), ChartRenderMain.Settings.ChartRenderShowHitJudgments, T("显示判定"));
+            bool showJ = GUI.Toggle(new Rect(lw + 80, y, cw - 60, 22), ChartRenderMain.Settings.ChartRenderShowHitJudgments, T("显示判定"));
             if (showJ != ChartRenderMain.Settings.ChartRenderShowHitJudgments) { ChartRenderMain.Settings.ChartRenderShowHitJudgments = showJ; SaveSettings(); }
 
             y += 30;
@@ -200,7 +277,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (float.TryParse(os, out float ov)) { ChartRenderMain.Settings.ChartRenderAudioSyncOffsetMs = Mathf.Clamp(ov, -500, 500); SaveSettings(); }
             int gameCalMs = 0;
             try { gameCalMs = scrConductor.currentPreset.inputOffset; } catch { }
-            GUI.Label(new Rect(lw + 80, y, vw - 60, 22), T("游戏") + ": " + gameCalMs + "ms");
+            GUI.Label(new Rect(lw + 80, y, cw - 60, 22), T("游戏") + ": " + gameCalMs + "ms");
 
             y += 30;
             // Rate control
@@ -209,7 +286,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] rcVals = { "crf", "vbr", "cbr" };
             int rcSel = Array.IndexOf(rcVals, ChartRenderMain.Settings.ChartRenderRateControl);
             if (rcSel < 0) rcSel = 0;
-            int rcNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), rcSel, rcModes, 3);
+            int rcNew = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), rcSel, rcModes, 3);
             if (rcNew != rcSel) { ChartRenderMain.Settings.ChartRenderRateControl = rcVals[rcNew]; SaveSettings(); }
 
             y += 30;
@@ -229,7 +306,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] modes = { "auto", "fastest", "balanced", "quality", "cpu" };
             int sel = Array.IndexOf(modes, ChartRenderMain.Settings.ChartRenderEncoderMode);
             if (sel < 0) sel = 0;
-            int ns = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), sel, modes, modes.Length);
+            int ns = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), sel, modes, (int)Mathf.Min(5, Mathf.Floor(cw / 70f)));
             if (ns != sel) { ChartRenderMain.Settings.ChartRenderEncoderMode = modes[ns]; SaveSettings(); }
 
             y += 30;
@@ -239,7 +316,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] pvVals = { "full", "dim", "minimal" };
             int pvSel = Array.IndexOf(pvVals, ChartRenderMain.Settings.ChartRenderPreviewMode);
             if (pvSel < 0) pvSel = 0;
-            int pvNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), pvSel, pvModes, 3);
+            int pvNew = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), pvSel, pvModes, 3);
             if (pvNew != pvSel) { ChartRenderMain.Settings.ChartRenderPreviewMode = pvVals[pvNew]; SaveSettings(); }
 
             y += 30;
@@ -249,7 +326,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] ofVals = { "mp4", "mkv", "mov" };
             int ofSel = Array.IndexOf(ofVals, ChartRenderMain.Settings.ChartRenderOutputFormat);
             if (ofSel < 0) ofSel = 0;
-            int ofNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), ofSel, ofModes, 3);
+            int ofNew = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), ofSel, ofModes, 3);
             if (ofNew != ofSel) { ChartRenderMain.Settings.ChartRenderOutputFormat = ofVals[ofNew]; SaveSettings(); }
 
             y += 30;
@@ -259,10 +336,39 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] afVals = { "aac", "flac", "alac" };
             int afSel = Array.IndexOf(afVals, ChartRenderMain.Settings.ChartRenderAudioFormat);
             if (afSel < 0) afSel = 0;
-            int afNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), afSel, afModes, 3);
+            int afNew = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), afSel, afModes, 3);
             if (afNew != afSel) { ChartRenderMain.Settings.ChartRenderAudioFormat = afVals[afNew]; SaveSettings(); }
 
-            y += 38;
+            // === Advanced FFmpeg Settings ===
+            y += 34;
+            bool adv = ChartRenderMain.Settings.ChartRenderAdvancedSettingsExpanded;
+            bool newAdv = GUI.Toggle(new Rect(14, y, cw, 22), adv, T("专业 FFmpeg 设置"));
+            if (newAdv != adv) { ChartRenderMain.Settings.ChartRenderAdvancedSettingsExpanded = newAdv; SaveSettings(); }
+
+            if (ChartRenderMain.Settings.ChartRenderAdvancedSettingsExpanded)
+            {
+                y += 26;
+                GUI.color = new Color(1f, 0.85f, 0.3f);
+                GUI.Label(new Rect(lw + 10, y, cw - 40, 36), T("警告：非专业用户请勿修改以下参数，可能导致渲染失败或画质异常。"));
+                GUI.color = Color.white;
+
+                y += 40;
+                string customArgs = ChartRenderMain.Settings.ChartRenderCustomMuxArguments ?? "";
+                string newArgs = GUI.TextField(new Rect(14, y, w - 28, 26), customArgs);
+                if (newArgs != customArgs) { ChartRenderMain.Settings.ChartRenderCustomMuxArguments = newArgs; SaveSettings(); }
+
+                y += 30;
+                if (GUI.Button(new Rect(lw + 10, y, 180, 24), T("打开 FFmpeg 参数参考")))
+                {
+                    string helpPath = Path.Combine(ChartRenderMain.Mod.Path, "Resources", "FFmpegReference.html");
+                    if (File.Exists(helpPath))
+                        Application.OpenURL("file://" + helpPath);
+                    else
+                        Application.OpenURL("https://ffmpeg.org/ffmpeg-all.html");
+                }
+            }
+
+            y += adv ? 40 : 30;
             // Status / Progress
             if (renderActive && chartRenderSession != null)
             {
@@ -274,12 +380,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
                 bool canRender = string.IsNullOrEmpty(reason) && !renderActive;
                 string status = (!string.IsNullOrEmpty(chartRenderMessage) ? chartRenderMessage
                     : (canRender ? T("就绪，点击开始渲染") : reason));
-                GUI.Label(new Rect(14, y, Width - 28, 40), status);
+                GUI.Label(new Rect(14, y, w - 28, 40), status);
 
                 y += 50;
                 GUI.enabled = canRender;
                 GUI.backgroundColor = canRender ? new Color(0.3f, 0.7f, 0.3f) : Color.gray;
-                if (GUI.Button(new Rect(14, y, Width - 28, 36), T("开始渲染")))
+                if (GUI.Button(new Rect(14, y, w - 28, 36), T("开始渲染")))
                 {
                     StartChartRender();
                 }
@@ -299,13 +405,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private void DrawProgress(float y)
         {
             var s = chartRenderSession;
+            float fw = windowRect.width - 28;
             float pct = Mathf.Clamp01(s.Progress);
-            float fw = Width - 28;
             int wf = s.WrittenFrames, tf = s.TotalFrames;
             double fps = s.ProcessingFps;
             var eta = s.EstimatedRemaining;
 
-            // Progress bar
             var barRect = new Rect(14, y, fw, 20);
             GUI.Box(barRect, "");
             var fillRect = new Rect(14, y, fw * pct, 20);
@@ -323,7 +428,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             y += 20;
             GUI.Label(new Rect(14, y, fw, 20), s.DetailText);
 
-            // Cancel button
             y += 26;
             GUI.backgroundColor = new Color(0.8f, 0.3f, 0.3f);
             if (GUI.Button(new Rect(14, y, fw, 28), T("取消渲染")))
@@ -352,7 +456,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             chartRenderMessage = string.Empty;
             ChartRenderMain.Settings.EnsureDefaults(ChartRenderMain.Mod);
 
-            // Show cursor during render even if game setting hides it
             cursorWasVisible = Cursor.visible;
             cursorWasLocked = Cursor.lockState;
             Cursor.visible = true;
@@ -361,7 +464,6 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             chartRenderSession = new ChartRenderSession(ChartRenderMain.Mod, ChartRenderMain.Settings);
             StartCoroutine(chartRenderSession.Run(result =>
             {
-                // Restore cursor state
                 Cursor.visible = cursorWasVisible;
                 Cursor.lockState = cursorWasLocked;
 
@@ -396,6 +498,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "取消渲染" => "Cancel Render",
             " 重复帧" => " dup",
             "完成: " => "Done: ", "失败: " => "Failed: ",
+            "专业 FFmpeg 设置" => "Pro FFmpeg Settings",
+            "警告：非专业用户请勿修改以下参数，可能导致渲染失败或画质异常。" => "WARNING: Do not modify unless you know what you're doing. Incorrect values may break rendering.",
+            "打开 FFmpeg 参数参考" => "Open FFmpeg Reference",
             _ => zh
         };
 

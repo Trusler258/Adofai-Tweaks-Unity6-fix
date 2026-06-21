@@ -16,6 +16,7 @@ public class ChartRenderingSettings
     public bool EditorOverlayCollapsed = false;
     public float EditorOverlayX = -1f;
     public float EditorOverlayY = -1f;
+    public float EditorOverlayWidth = 400f;
 
     // --- Editor preferences ---
     public bool PersistEditorPreferences = true;
@@ -52,6 +53,9 @@ public class ChartRenderingSettings
     public string ChartRenderOutputFormat = "mp4";
     /// <summary>Audio codec: "aac", "flac", "alac"</summary>
     public string ChartRenderAudioFormat = "aac";
+
+    /// <summary>Custom FFmpeg mux arguments (advanced). Empty string = use defaults.</summary>
+    public string ChartRenderCustomMuxArguments = "";
 
     /// <summary>
     /// Ensure defaults for paths (called before render session).
