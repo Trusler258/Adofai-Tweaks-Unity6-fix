@@ -9,7 +9,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const int WindowId = 0x7E71A01;
         private const float Width = 400f;
         private const float CollapsedH = 36f;
-        private const float ExpandedH = 620f;
+        private const float ExpandedH = 700f;
 
         private static EditorTweaksOverlayWindow instance;
         private static bool mouseCapturedByOverlay;
@@ -153,27 +153,36 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (GUI.Button(new Rect(Width - 34, y, 22, 22), "D")) { ChartRenderMain.Settings.ChartRenderExportDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "ADOFAI Renders"); SaveSettings(); }
 
             y += 38;
-            // Width / Height
+            // Width / Height with presets
             GUI.Label(new Rect(14, y, lw, 22), T("宽度"));
-            var ws = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderWidth.ToString());
+            var ws = GUI.TextField(new Rect(lw + 10, y, 50, 22), ChartRenderMain.Settings.ChartRenderWidth.ToString());
             if (int.TryParse(ws, out int wv)) { ChartRenderMain.Settings.ChartRenderWidth = Mathf.Clamp(wv, 16, 7680); SaveSettings(); }
 
-            GUI.Label(new Rect(lw + 80, y, 40, 22), T("高度"));
-            var hs = GUI.TextField(new Rect(lw + 120, y, 60, 22), ChartRenderMain.Settings.ChartRenderHeight.ToString());
+            GUI.Label(new Rect(lw + 70, y, 35, 22), T("高度"));
+            var hs = GUI.TextField(new Rect(lw + 105, y, 50, 22), ChartRenderMain.Settings.ChartRenderHeight.ToString());
             if (int.TryParse(hs, out int hv)) { ChartRenderMain.Settings.ChartRenderHeight = Mathf.Clamp(hv, 16, 4320); SaveSettings(); }
 
+            // Resolution presets
+            if (GUI.Button(new Rect(lw + 165, y, 35, 22), "1K")) { ChartRenderMain.Settings.ChartRenderWidth = 1920; ChartRenderMain.Settings.ChartRenderHeight = 1080; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 202, y, 30, 22), "2K")) { ChartRenderMain.Settings.ChartRenderWidth = 2560; ChartRenderMain.Settings.ChartRenderHeight = 1440; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 234, y, 30, 22), "4K")) { ChartRenderMain.Settings.ChartRenderWidth = 3840; ChartRenderMain.Settings.ChartRenderHeight = 2160; SaveSettings(); }
+
             y += 30;
-            // FPS / CRF
+            // FPS / CRF with presets
             GUI.Label(new Rect(14, y, lw, 22), T("帧率"));
-            var fs = GUI.TextField(new Rect(lw + 10, y, 50, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
+            var fs = GUI.TextField(new Rect(lw + 10, y, 40, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
             if (int.TryParse(fs, out int fv)) { ChartRenderMain.Settings.ChartRenderFps = Mathf.Clamp(fv, 1, 240); SaveSettings(); }
 
-            GUI.Label(new Rect(lw + 70, y, 35, 22), T("CRF"));
-            var cs = GUI.TextField(new Rect(lw + 105, y, 50, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
+            if (GUI.Button(new Rect(lw + 54, y, 28, 22), "30")) { ChartRenderMain.Settings.ChartRenderFps = 30; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 84, y, 28, 22), "60")) { ChartRenderMain.Settings.ChartRenderFps = 60; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 114, y, 28, 22), "120")) { ChartRenderMain.Settings.ChartRenderFps = 120; SaveSettings(); }
+
+            GUI.Label(new Rect(lw + 150, y, 35, 22), T("CRF"));
+            var cs = GUI.TextField(new Rect(lw + 185, y, 40, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
             if (int.TryParse(cs, out int cv)) { ChartRenderMain.Settings.ChartRenderCrf = Mathf.Clamp(cv, 0, 51); SaveSettings(); }
 
-            // Profile text inline next to CRF
-            GUI.Label(new Rect(lw + 165, y, vw + 85, 22), GetProfileText());
+            // Profile text inline
+            GUI.Label(new Rect(lw + 230, y, 160, 22), GetProfileText());
 
             y += 30;
             // Tail / Judgments
@@ -208,8 +217,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             bool isBitrate = ChartRenderMain.Settings.ChartRenderRateControl != "crf";
             GUI.enabled = isBitrate;
             GUI.Label(new Rect(14, y, lw, 22), T("码率(Mbps)"));
-            var brs = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderBitrateMbps.ToString("0.#"));
-            if (float.TryParse(brs, out float brv)) { ChartRenderMain.Settings.ChartRenderBitrateMbps = Mathf.Clamp(brv, 0.5f, 500f); SaveSettings(); }
+            string brText = ChartRenderMain.Settings.ChartRenderBitrateMbps <= 0f ? "auto" : ChartRenderMain.Settings.ChartRenderBitrateMbps.ToString("0.#");
+            var brs = GUI.TextField(new Rect(lw + 10, y, 60, 22), brText);
+            if (brs.ToLower() == "auto" || brs == "0") { ChartRenderMain.Settings.ChartRenderBitrateMbps = 0f; SaveSettings(); }
+            else if (float.TryParse(brs, out float brv)) { ChartRenderMain.Settings.ChartRenderBitrateMbps = Mathf.Clamp(brv, 0.5f, 500f); SaveSettings(); }
             GUI.enabled = true;
 
             y += 30;
@@ -230,6 +241,26 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (pvSel < 0) pvSel = 0;
             int pvNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), pvSel, pvModes, 3);
             if (pvNew != pvSel) { ChartRenderMain.Settings.ChartRenderPreviewMode = pvVals[pvNew]; SaveSettings(); }
+
+            y += 30;
+            // Output format
+            GUI.Label(new Rect(14, y, lw, 22), T("输出格式"));
+            string[] ofModes = { "MP4", "MKV", "MOV" };
+            string[] ofVals = { "mp4", "mkv", "mov" };
+            int ofSel = Array.IndexOf(ofVals, ChartRenderMain.Settings.ChartRenderOutputFormat);
+            if (ofSel < 0) ofSel = 0;
+            int ofNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), ofSel, ofModes, 3);
+            if (ofNew != ofSel) { ChartRenderMain.Settings.ChartRenderOutputFormat = ofVals[ofNew]; SaveSettings(); }
+
+            y += 30;
+            // Audio format
+            GUI.Label(new Rect(14, y, lw, 22), T("音频格式"));
+            string[] afModes = { "AAC", "FLAC", "ALAC" };
+            string[] afVals = { "aac", "flac", "alac" };
+            int afSel = Array.IndexOf(afVals, ChartRenderMain.Settings.ChartRenderAudioFormat);
+            if (afSel < 0) afSel = 0;
+            int afNew = GUI.SelectionGrid(new Rect(lw + 10, y, vw + 40, 22), afSel, afModes, 3);
+            if (afNew != afSel) { ChartRenderMain.Settings.ChartRenderAudioFormat = afVals[afNew]; SaveSettings(); }
 
             y += 38;
             // Status / Progress
@@ -260,7 +291,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private static string GetProfileText()
         {
             var s = ChartRenderMain.Settings;
-            string rc = s.ChartRenderRateControl == "crf" ? "CRF:" + s.ChartRenderCrf : s.ChartRenderRateControl.ToUpper() + " " + s.ChartRenderBitrateMbps.ToString("0.#") + "M";
+            string rc = s.ChartRenderRateControl == "crf" ? "CRF:" + s.ChartRenderCrf
+                : (s.ChartRenderRateControl.ToUpper() + " " + (s.ChartRenderBitrateMbps <= 0f ? "auto" : s.ChartRenderBitrateMbps.ToString("0.#") + "M"));
             return $"{s.ChartRenderWidth}x{s.ChartRenderHeight} @ {s.ChartRenderFps}fps {rc}";
         }
 
@@ -358,6 +390,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             "码率模式" => "Rate Control",
             "码率(Mbps)" => "Bitrate(Mbps)",
             "预览" => "Preview",
+            "输出格式" => "Format",
+            "音频格式" => "Audio",
             "步骤" => "Step",
             "取消渲染" => "Cancel Render",
             " 重复帧" => " dup",

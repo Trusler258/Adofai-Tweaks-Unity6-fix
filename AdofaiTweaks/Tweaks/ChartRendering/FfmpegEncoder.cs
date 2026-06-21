@@ -293,18 +293,22 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
                     + " -cq " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
             }
-            // VBR / CBR
-            string bv = ((int)(bitrateMbps * 1000)) + "k";
-            string maxrate = ((int)(bitrateMbps * 2000)) + "k";
-            string bufsize = ((int)(bitrateMbps * 4000)) + "k";
+
+            // VBR / CBR with smart bitrate
+            int target = GetTargetBitrate();
+            int maxrate = ChartRenderBitratePresets.GetMaxRateMbps(target);
+            int bufsize = ChartRenderBitratePresets.GetBufferSizeMbps(target);
+            string bv = target + "M";
+            string mr = (rateControl == "cbr") ? bv : (maxrate + "M");
+            string bs = bufsize + "M";
             if (rateControl == "cbr")
             {
                 return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
-                    + " -rc cbr -b:v " + bv + " -maxrate " + bv + " -bufsize " + bufsize
+                    + " -rc cbr -b:v " + bv + " -maxrate " + bv + " -bufsize " + bs
                     + " -g " + Math.Max(1, fps * 2);
             }
             return "-c:v h264_nvenc -preset " + nvencPreset + " -tune " + tune
-                + " -rc vbr -b:v " + bv + " -maxrate " + maxrate + " -bufsize " + bufsize
+                + " -rc vbr -b:v " + bv + " -maxrate " + mr + " -bufsize " + bs
                 + " -g " + Math.Max(1, fps * 2);
         }
 
@@ -314,18 +318,27 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             {
                 return "-c:v libx264 -preset " + Quote(x264Preset) + " -crf " + ClampCrf() + " -g " + Math.Max(1, fps * 2);
             }
-            string bv = ((int)(bitrateMbps * 1000)) + "k";
-            string maxrate = ((int)(bitrateMbps * 2000)) + "k";
-            string bufsize = ((int)(bitrateMbps * 4000)) + "k";
+            int target = GetTargetBitrate();
+            int maxrate = ChartRenderBitratePresets.GetMaxRateMbps(target);
+            int bufsize = ChartRenderBitratePresets.GetBufferSizeMbps(target);
+            string bv = target + "M";
+            string mr = (rateControl == "cbr") ? bv : (maxrate + "M");
+            string bs = bufsize + "M";
             if (rateControl == "cbr")
             {
                 return "-c:v libx264 -preset " + Quote(x264Preset)
-                    + " -b:v " + bv + " -maxrate " + bv + " -bufsize " + bufsize
+                    + " -b:v " + bv + " -maxrate " + bv + " -bufsize " + bs
                     + " -nal-hrd cbr -g " + Math.Max(1, fps * 2);
             }
             return "-c:v libx264 -preset " + Quote(x264Preset)
-                + " -b:v " + bv + " -maxrate " + maxrate + " -bufsize " + bufsize
+                + " -b:v " + bv + " -maxrate " + mr + " -bufsize " + bs
                 + " -g " + Math.Max(1, fps * 2);
+        }
+
+        private int GetTargetBitrate()
+        {
+            return ChartRenderBitratePresets.ResolveTargetBitrateMbps(
+                (int)(bitrateMbps + 0.5f), width, height, fps);
         }
 
         private string GetCustomVideoEncoderArguments()

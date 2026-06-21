@@ -19,6 +19,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         private readonly ChartRenderPlaybackController playbackController;
 
         private bool cancelRequested;
+        private int savedInputOffset;
+        private bool calibrationWasZeroed;
         private double renderDurationSeconds = 1.0;
         private string tempDirectory = string.Empty;
         private string tempVideoPath = string.Empty;
@@ -373,6 +375,14 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsAutoPlaybackReady = false;
             IsActive = false;
             IsRendering = false;
+
+            // Restore calibration if we zeroed it
+            if (calibrationWasZeroed)
+            {
+                try { scrConductor.currentPreset.inputOffset = savedInputOffset; } catch { }
+                calibrationWasZeroed = false;
+            }
+
             ChartRenderVisualClock.End();
             ChartRenderPatcher.Disable();
             RestoreState();
@@ -416,7 +426,9 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 ChartRenderDiagnostics.Begin(Path.Combine(tempDirectory, "render.log"));
 
                 string levelName = GetLevelName();
-                string fileName = ChartRenderPaths.MakeSafeFileName(levelName) + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".mp4";
+                string ext = (settings.ChartRenderOutputFormat ?? "mp4").Trim().ToLowerInvariant();
+                if (ext != "mp4" && ext != "mkv" && ext != "mov") ext = "mp4";
+                string fileName = ChartRenderPaths.MakeSafeFileName(levelName) + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + "." + ext;
                 outputPath = Path.Combine(export, fileName);
                 result.OutputPath = outputPath;
             }, out failure);
@@ -523,6 +535,13 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             try
             {
                 inputOffsetMs = scrConductor.currentPreset.inputOffset;
+                // Zero calibration during render for clean output
+                if (inputOffsetMs != 0)
+                {
+                    savedInputOffset = inputOffsetMs;
+                    scrConductor.currentPreset.inputOffset = 0;
+                    calibrationWasZeroed = true;
+                }
             }
             catch
             {
