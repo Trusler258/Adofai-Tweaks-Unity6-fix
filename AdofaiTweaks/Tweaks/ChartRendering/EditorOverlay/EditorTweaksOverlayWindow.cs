@@ -190,10 +190,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         {
             bool renderActive = chartRenderSession != null && chartRenderSession.IsActive;
             float w = windowRect.width;
+            int oldFontSize = GUI.skin.button.fontSize;
 
             // Title bar buttons
-            GUI.backgroundColor = Color.clear;
-            if (GUI.Button(new Rect(w - 30, 4, 22, 22), ChartRenderMain.Settings.EditorOverlayCollapsed ? "+" : "-"))
+            if (GUI.Button(new Rect(w - 30, 4, 24, 24), ChartRenderMain.Settings.EditorOverlayCollapsed ? "+" : "-"))
             {
                 ChartRenderMain.Settings.EditorOverlayCollapsed = !ChartRenderMain.Settings.EditorOverlayCollapsed;
                 SaveSettings();
@@ -236,12 +236,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (int.TryParse(hs, out int hv)) { ChartRenderMain.Settings.ChartRenderHeight = Mathf.Clamp(hv, 16, 4320); SaveSettings(); }
 
             // Resolution presets
-            float px = hx + (narrow ? 18f : 35f) + hw + 8;
-            GUI.skin.button.fontSize = 10;
-            if (GUI.Button(new Rect(px, y, 28, 22), "1K")) { ChartRenderMain.Settings.ChartRenderWidth = 1920; ChartRenderMain.Settings.ChartRenderHeight = 1080; SaveSettings(); }
-            if (GUI.Button(new Rect(px + 30, y, 28, 22), "2K")) { ChartRenderMain.Settings.ChartRenderWidth = 2560; ChartRenderMain.Settings.ChartRenderHeight = 1440; SaveSettings(); }
-            if (GUI.Button(new Rect(px + 60, y, 28, 22), "4K")) { ChartRenderMain.Settings.ChartRenderWidth = 3840; ChartRenderMain.Settings.ChartRenderHeight = 2160; SaveSettings(); }
+            float px = hx + (narrow ? 18f : 35f) + hw + 6;
             GUI.skin.button.fontSize = 11;
+            if (GUI.Button(new Rect(px, y, 30, 22), "1K")) { ChartRenderMain.Settings.ChartRenderWidth = 1920; ChartRenderMain.Settings.ChartRenderHeight = 1080; SaveSettings(); }
+            if (GUI.Button(new Rect(px + 32, y, 30, 22), "2K")) { ChartRenderMain.Settings.ChartRenderWidth = 2560; ChartRenderMain.Settings.ChartRenderHeight = 1440; SaveSettings(); }
+            if (GUI.Button(new Rect(px + 64, y, 30, 22), "4K")) { ChartRenderMain.Settings.ChartRenderWidth = 3840; ChartRenderMain.Settings.ChartRenderHeight = 2160; SaveSettings(); }
+            GUI.skin.button.fontSize = oldFontSize;
 
             y += 30;
             // FPS / CRF with presets
@@ -249,17 +249,17 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             var fs = GUI.TextField(new Rect(lw + 10, y, 40, 22), ChartRenderMain.Settings.ChartRenderFps.ToString());
             if (int.TryParse(fs, out int fv)) { ChartRenderMain.Settings.ChartRenderFps = Mathf.Clamp(fv, 1, 240); SaveSettings(); }
 
-            GUI.skin.button.fontSize = 10;
-            if (GUI.Button(new Rect(lw + 54, y, 28, 22), "30")) { ChartRenderMain.Settings.ChartRenderFps = 30; SaveSettings(); }
-            if (GUI.Button(new Rect(lw + 84, y, 28, 22), "60")) { ChartRenderMain.Settings.ChartRenderFps = 60; SaveSettings(); }
-            if (GUI.Button(new Rect(lw + 114, y, 28, 22), "120")) { ChartRenderMain.Settings.ChartRenderFps = 120; SaveSettings(); }
             GUI.skin.button.fontSize = 11;
+            if (GUI.Button(new Rect(lw + 54, y, 32, 22), "30")) { ChartRenderMain.Settings.ChartRenderFps = 30; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 88, y, 32, 22), "60")) { ChartRenderMain.Settings.ChartRenderFps = 60; SaveSettings(); }
+            if (GUI.Button(new Rect(lw + 122, y, 32, 22), "120")) { ChartRenderMain.Settings.ChartRenderFps = 120; SaveSettings(); }
+            GUI.skin.button.fontSize = oldFontSize;
 
-            GUI.Label(new Rect(lw + 150, y, 35, 22), T("CRF"));
-            var cs = GUI.TextField(new Rect(lw + 185, y, 40, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
+            GUI.Label(new Rect(lw + 162, y, 35, 22), T("CRF"));
+            var cs = GUI.TextField(new Rect(lw + 197, y, 40, 22), ChartRenderMain.Settings.ChartRenderCrf.ToString());
             if (int.TryParse(cs, out int cv)) { ChartRenderMain.Settings.ChartRenderCrf = Mathf.Clamp(cv, 0, 51); SaveSettings(); }
 
-            GUI.Label(new Rect(lw + 230, y, w - lw - 240, 22), GetProfileText());
+            GUI.Label(new Rect(lw + 242, y, w - lw - 250, 22), GetProfileText());
 
             y += 30;
             // Tail / Judgments
@@ -306,7 +306,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             string[] modes = { "auto", "fastest", "balanced", "quality", "cpu" };
             int sel = Array.IndexOf(modes, ChartRenderMain.Settings.ChartRenderEncoderMode);
             if (sel < 0) sel = 0;
-            int ns = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), sel, modes, (int)Mathf.Min(5, Mathf.Floor(cw / 70f)));
+            int encoderCols = narrow ? 3 : 5;
+            int ns = GUI.SelectionGrid(new Rect(lw + 10, y, cw + 40, 22), sel, modes, encoderCols);
             if (ns != sel) { ChartRenderMain.Settings.ChartRenderEncoderMode = modes[ns]; SaveSettings(); }
 
             y += 30;
@@ -358,7 +359,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
                 if (newArgs != customArgs) { ChartRenderMain.Settings.ChartRenderCustomMuxArguments = newArgs; SaveSettings(); }
 
                 y += 30;
-                if (GUI.Button(new Rect(lw + 10, y, 180, 24), T("打开 FFmpeg 参数参考")))
+                if (GUI.Button(new Rect(lw + 10, y, cw, 24), T("打开 FFmpeg 参数参考")))
                 {
                     string helpPath = Path.Combine(ChartRenderMain.Mod.Path, "Resources", "FFmpegReference.html");
                     if (File.Exists(helpPath))
