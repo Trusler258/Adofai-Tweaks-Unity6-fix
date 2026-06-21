@@ -28,8 +28,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             // Judgments (toggles hit text display)
             typeof(ChartRenderJudgmentPatches),
 
-            // Editor input blocking (prevents accidental gameplay input during render)
-            typeof(EditorOverlay.EditorOverlayInputBlockPatches.ControllerUpdatePatch),
+            // Editor input blocking (only gameplay input during render)
             typeof(EditorOverlay.EditorOverlayInputBlockPatches.ControllerTogglePausePatch),
             typeof(EditorOverlay.EditorOverlayInputBlockPatches.PlayerManagerInputPatch),
             typeof(EditorOverlay.EditorOverlayInputBlockPatches.PlayerInputTriggeredPatch),
