@@ -525,18 +525,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
         private void BeginForcedVisualClock()
         {
             scrConductor conductor = ADOBase.conductor;
-            double rawStartSongPosition = conductor == null ? 0.0 : conductor.songposition_minusi;
-            double dspStartSongPosition = GetDspSongPosition(conductor);
-            double startSongPosition = playbackController.PlaybackStartsAtBeginning
-                ? SanitizeBeginningSongPosition(conductor, dspStartSongPosition)
-                : dspStartSongPosition;
-            ChartRenderVisualClock.Begin(startSongPosition);
 
+            // Zero calibration BEFORE anchoring visual clock — otherwise songposition reads include the offset
             int inputOffsetMs = 0;
             try
             {
                 inputOffsetMs = scrConductor.currentPreset.inputOffset;
-                // Zero calibration during render for clean output
                 if (inputOffsetMs != 0)
                 {
                     savedInputOffset = inputOffsetMs;
@@ -544,9 +538,14 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                     calibrationWasZeroed = true;
                 }
             }
-            catch
-            {
-            }
+            catch { }
+
+            double rawStartSongPosition = conductor == null ? 0.0 : conductor.songposition_minusi;
+            double dspStartSongPosition = GetDspSongPosition(conductor);
+            double startSongPosition = playbackController.PlaybackStartsAtBeginning
+                ? SanitizeBeginningSongPosition(conductor, dspStartSongPosition)
+                : dspStartSongPosition;
+            ChartRenderVisualClock.Begin(startSongPosition);
 
             double addOffset = conductor == null ? 0.0 : conductor.addoffset;
             WriteLog("Visual clock anchored to audio DSP at songposition=" + Number(startSongPosition)
