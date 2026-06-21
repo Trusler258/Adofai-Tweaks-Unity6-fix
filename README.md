@@ -1,4 +1,4 @@
-# AdofaiTweaks v2.9.0 — Unity 6 / r143 兼容移植
+# AdofaiTweaks v2.9.0 — Unity 6 / r143 增强版
 
 [![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -11,7 +11,7 @@
 
 ### 这是什么
 
-基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的项目，修复了《冰与火之舞》升级到 Unity 6（r143）后的兼容性问题。
+基于 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 的项目，修复了《冰与火之舞》升级到 Unity 6（r143）后的兼容性问题，并集成了谱面视频渲染等新功能。
 
 ### 功能来源
 

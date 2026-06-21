@@ -1,4 +1,4 @@
-# AdofaiTweaks v2.9.0 — Unity 6 / r143 互換性ポート
+# AdofaiTweaks v2.9.0 — Unity 6 / r143 強化版
 
 [![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -11,7 +11,7 @@
 
 ### 概要
 
-《氷と炎のダンス》が Unity 6 (r143) にアップグレードされた際、多数の Harmony パッチが破損しました。このフォークは [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) のすべての API 変更を修正し、単一パッチの失敗が Mod 全体をクラッシュさせないよう防御的エラーハンドリングを追加しています。
+《氷と炎のダンス》が Unity 6 (r143) にアップグレードされた際、多数の Harmony パッチが破損しました。このフォークは [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) の API 変更を修正し、譜面動画レンダリングなどの新機能を追加しています。
 
 ### 機能の出典
 

@@ -1,4 +1,4 @@
-# AdofaiTweaks v2.9.0 — Unity 6 / r143 호환성 포트
+# AdofaiTweaks v2.9.0 — Unity 6 / r143 강화판
 
 [![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -11,7 +11,7 @@
 
 ### 소개
 
-《불과 얼음의 춤》이 Unity 6 (r143) 으로 업그레이드되면서 많은 Harmony 패치가 깨졌습니다. 이 포크는 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 에서 모든 API 변경 사항을 수정하고 방어적 오류 처리를 추가했습니다.
+《불과 얼음의 춤》이 Unity 6 (r143) 으로 업그레이드되면서 많은 Harmony 패치가 깨졌습니다. 이 포크는 [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) 의 API 변경 사항을 수정하고, 차트 영상 렌더링 등 새로운 기능을 추가했습니다.
 
 ### 기능 출처
 

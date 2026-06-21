@@ -1,4 +1,4 @@
-# AdofaiTweaks v2.9.0 — Unity 6 / r143 Compatibility Port
+# AdofaiTweaks v2.9.0 — Unity 6 / r143 Enhanced
 
 [![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -11,7 +11,7 @@
 
 ### What is this
 
-A Unity 6 / r143 compatibility fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) for A Dance of Fire and Ice. The game underwent significant C# code refactoring during the Unity 6 upgrade, breaking many Harmony patches. This fork addresses all API changes and adds defensive error handling to prevent single-patch failures from crashing the entire mod.
+A Unity 6 / r143 compatibility fork of [PizzaLovers007/AdofaiTweaks](https://github.com/PizzaLovers007/AdofaiTweaks) for A Dance of Fire and Ice, enhanced with chart video rendering and other new features.
 
 ### Feature Origins
 
