@@ -33,9 +33,12 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             mouseOverOverlay = false;
         }
 
-        public static bool ShouldBlockEditorInput() => (instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive) || mouseOverOverlay;
+        private static bool IsRenderActive => instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive;
+
+        // Gameplay input (ESC, space, etc.) only blocked during active render — never just because mouse is over overlay
+        public static bool ShouldBlockEditorInput() => IsRenderActive || mouseOverOverlay;
         public static bool ShouldBlockMouseInput() => mouseOverOverlay;
-        public static bool ShouldBlockGameplayInput() => ShouldBlockEditorInput();
+        public static bool ShouldBlockGameplayInput() => IsRenderActive;
         public static bool ShouldBlockUnityUiInput() => mouseOverOverlay;
 
         private void Awake()
