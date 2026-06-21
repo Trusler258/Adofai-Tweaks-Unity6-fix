@@ -12,7 +12,8 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         private const float ExpandedH = 620f;
 
         private static EditorTweaksOverlayWindow instance;
-        private static bool mouseOverOverlay;
+        private static bool mouseCapturedByOverlay;
+        private static int mouseCaptureReleaseFrame = -1;
         private Rect windowRect;
         private ChartRenderSession chartRenderSession;
         private string chartRenderMessage;
@@ -32,15 +33,69 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
             if (instance == null) return;
             Destroy(instance.gameObject);
             instance = null;
-            mouseOverOverlay = false;
+            mouseCapturedByOverlay = false;
+            mouseCaptureReleaseFrame = -1;
         }
 
         private static bool IsRenderActive => instance != null && instance.chartRenderSession != null && instance.chartRenderSession.IsActive;
 
-        public static bool ShouldBlockEditorInput() => IsRenderActive || mouseOverOverlay;
-        public static bool ShouldBlockMouseInput() => mouseOverOverlay;
+        public static bool ShouldBlockEditorInput() => IsRenderActive || ShouldBlockMouseInput();
         public static bool ShouldBlockGameplayInput() => IsRenderActive;
-        public static bool ShouldBlockUnityUiInput() => mouseOverOverlay;
+        public static bool ShouldBlockUnityUiInput() => ShouldBlockMouseInput();
+
+        public static bool ShouldBlockMouseInput()
+        {
+            // Release stale captures
+            if (mouseCaptureReleaseFrame >= 0 && Time.frameCount > mouseCaptureReleaseFrame)
+            {
+                mouseCapturedByOverlay = false;
+                mouseCaptureReleaseFrame = -1;
+            }
+
+            if (instance == null || !ShouldDraw())
+            {
+                mouseCapturedByOverlay = false;
+                mouseCaptureReleaseFrame = -1;
+                return false;
+            }
+
+            bool insideOverlay = instance.IsMouseInsideWindow();
+            bool mouseDown = IsAnyMouseButtonDown();
+            bool mouseUp = IsAnyMouseButtonUp();
+            bool mouseHeld = IsAnyMouseButtonHeld();
+            bool mouseActivity = mouseDown || mouseUp || mouseHeld || HasMouseWheelActivity();
+
+            // Capture mouse on click inside overlay
+            if (mouseDown)
+                mouseCapturedByOverlay = insideOverlay;
+
+            bool capturedThisFrame = mouseCapturedByOverlay || mouseCaptureReleaseFrame == Time.frameCount;
+            bool block = mouseActivity && (insideOverlay || capturedThisFrame);
+
+            // Release capture one frame after mouse up
+            if (mouseUp && mouseCapturedByOverlay && !mouseHeld)
+                mouseCaptureReleaseFrame = Time.frameCount;
+
+            return block;
+        }
+
+        private bool IsMouseInsideWindow()
+        {
+            Vector2 guiMouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            return windowRect.Contains(guiMouse);
+        }
+
+        private static bool IsAnyMouseButtonDown()
+            => Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
+
+        private static bool IsAnyMouseButtonHeld()
+            => Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2);
+
+        private static bool IsAnyMouseButtonUp()
+            => Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1) || Input.GetMouseButtonUp(2);
+
+        private static bool HasMouseWheelActivity()
+            => Mathf.Abs(Input.mouseScrollDelta.x) > 0.01f || Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f;
 
         private void Awake()
         {
@@ -53,22 +108,10 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
         private void OnGUI()
         {
-            mouseOverOverlay = false;
             if (!ShouldDraw()) return;
             float h = ChartRenderMain.Settings.EditorOverlayCollapsed ? CollapsedH : ExpandedH;
             windowRect.height = h;
             windowRect.width = Width;
-
-            // Consume mouse events when over overlay to prevent click passthrough to chart
-            Vector2 guiMouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            if (windowRect.Contains(guiMouse))
-            {
-                mouseOverOverlay = true;
-                Event e = Event.current;
-                if (e.isMouse || e.type == EventType.ScrollWheel)
-                    e.Use();
-            }
-
             windowRect = GUI.Window(WindowId, windowRect, DrawWindow, T("谱面视频渲染"));
         }
 
