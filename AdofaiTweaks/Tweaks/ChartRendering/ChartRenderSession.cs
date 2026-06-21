@@ -170,6 +170,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
                 EncoderName = encoder.EncoderName;
                 BeginForcedVisualClock();
                 SetForcedFrameTimeFromAudioCursor(0);
+                ChartRenderPatcher.Enable();
                 EnableRenderAutoPlayback();
                 ChartRenderDiagnostics.LogFrame(0, 0);
             }, out failure))
@@ -373,6 +374,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering
             IsActive = false;
             IsRendering = false;
             ChartRenderVisualClock.End();
+            ChartRenderPatcher.Disable();
             RestoreState();
             ChartRenderDiagnostics.End();
             onComplete(result);
