@@ -263,7 +263,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
 
             y += 30;
             // Tail / Judgments
-            GUI.Label(new Rect(14, y, narrow ? 50f : lw, 22), T("尾巴(秒)"));
+            GUI.Label(new Rect(14, y, narrow ? 70f : lw, 22), T("结束后等待(秒)"));
             var ts = GUI.TextField(new Rect(lw + 10, y, 60, 22), ChartRenderMain.Settings.ChartRenderCompletionTailSeconds.ToString("0.0"));
             if (float.TryParse(ts, out float tv)) { ChartRenderMain.Settings.ChartRenderCompletionTailSeconds = Mathf.Clamp(tv, 0, 30); SaveSettings(); }
 
@@ -478,7 +478,7 @@ namespace AdofaiTweaks.Tweaks.ChartRendering.EditorOverlay
         {
             "谱面视频渲染" => "Chart Renderer",
             "宽度" => "Width", "高度" => "Height", "帧率" => "FPS",
-            "尾巴(秒)" => "Tail (s)", "显示判定" => "Show Judgments",
+            "结束后等待(秒)" => "Wait After End (s)", "显示判定" => "Show Judgments",
             "编码器" => "Encoder", "渲染中..." => "Rendering...",
             "就绪，点击开始渲染" => "Ready, click to render",
             "开始渲染" => "Start Render",
