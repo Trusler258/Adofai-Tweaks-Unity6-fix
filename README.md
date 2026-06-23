@@ -1,5 +1,5 @@
 # AdofaiTweaks v2.9.0 — Unity 6 / r143 增强版
-
+# 原项目已更新,此仓库不再维护
 [![C#](https://img.shields.io/badge/C%23-4.8-blue)](https://learn.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Version](https://img.shields.io/badge/version-v2.9.0-ff69b4)](https://github.com/Trusler258/Adofai-Tweaks-Unity6-fix)
