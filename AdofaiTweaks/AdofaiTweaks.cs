@@ -17,7 +17,7 @@ public static class AdofaiTweaks
 {
     public static UnityModManager.ModEntry.ModLogger Logger { get; private set; }
     public static bool IsEnabled { get; private set; }
-    public static readonly int ReleaseNumber = (int)AccessTools.Field(typeof(GCNS), "releaseNumber").GetValue(null);
+    public static readonly int ReleaseNumber = Releases.releaseNumber;
 
     [SyncTweakSettings]
     public static GlobalSettings GlobalSettings { get; set; }
